@@ -12,7 +12,6 @@ import { pathToFileURL } from "node:url";
 import { jidDe, jidIgnorado, telefonoDeJid } from "./traducir.mjs";
 
 const REINTENTO_MS = 1_500;
-const DURACION_QR_MS = 60_000;
 
 /** La entrada ESM de un paquete instalado en la carpeta de la herramienta. */
 function entradaDe(raiz) {
@@ -40,7 +39,7 @@ async function cargar(carpeta) {
 export async function crearConexionBaileys(eventos, o) {
   const { baileys, registro } = await cargar(o.carpeta);
   const makeWASocket = baileys.default?.default ?? baileys.default ?? baileys.makeWASocket;
-  const { Browsers, DisconnectReason, downloadMediaMessage, fetchLatestBaileysVersion, isLidUser, jidNormalizedUser, useMultiFileAuthState } = baileys;
+  const { DisconnectReason, downloadMediaMessage, fetchLatestBaileysVersion, fetchLatestWaWebVersion, isLidUser, jidNormalizedUser, useMultiFileAuthState } = baileys;
 
   const inicio = Math.floor(Date.now() / 1000) - 5;
   const enviadosPorMi = new Set();
@@ -48,6 +47,24 @@ export async function crearConexionBaileys(eventos, o) {
   const pasados = new Map();
   let sock = null;
   let parando = false;
+  /** La última versión que ha dado web.whatsapp.com: si un reintento no llega, se sigue con ella. */
+  let versionWeb = null;
+
+  /**
+   * La versión de WhatsApp Web que se anuncia: la que sirve hoy web.whatsapp.com. La que trae Baileys
+   * se queda atrás (la de rc14 es de julio de 2026) y, con una vieja, el QR sale pero el móvil no
+   * vincula: «Revisa tu conexión y vuelve a intentarlo». Sin web.whatsapp.com, la de Baileys.
+   */
+  async function versionAnunciada() {
+    const web = await fetchLatestWaWebVersion?.().catch(() => null);
+    if (web?.isLatest && Array.isArray(web.version)) {
+      if (versionWeb?.join(".") !== web.version.join(".")) o.log(`WhatsApp Web ${web.version.join(".")}`);
+      versionWeb = web.version;
+    }
+    if (versionWeb) return versionWeb;
+    const repo = await fetchLatestBaileysVersion?.().catch(() => null);
+    return repo?.isLatest && Array.isArray(repo.version) ? repo.version : undefined;
+  }
 
   const miNumero = () => (sock?.user?.id ? telefonoDeJid(jidNormalizedUser(sock.user.id)) : null);
   const esMiChat = (jid) => {
@@ -69,15 +86,16 @@ export async function crearConexionBaileys(eventos, o) {
   async function conectar() {
     if (parando) return;
     const { state, saveCreds } = await useMultiFileAuthState(o.sesion);
-    const { version } = await fetchLatestBaileysVersion().catch(() => ({ version: undefined }));
+    const version = await versionAnunciada();
+    // El navegador y lo que dura cada QR, los de Baileys: Chrome en macOS, y 60 s el primer código y
+    // 20 s los demás, lo que WhatsApp da por bueno cada uno. Con un nombre propio, el QR le dice al
+    // móvil «otro tipo de cliente»; con códigos más largos, a partir del segundo se escanea uno caducado.
     sock = makeWASocket({
       ...(version ? { version } : {}),
       auth: state,
       ...(registro ? { logger: registro } : {}),
-      browser: Browsers.macOS("CRM modo prueba"),
       syncFullHistory: false,
       markOnlineOnConnect: false,
-      qrTimeout: DURACION_QR_MS,
     });
     sock.ev.on("creds.update", saveCreds);
 

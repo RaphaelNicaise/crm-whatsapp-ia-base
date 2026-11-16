@@ -1,6 +1,6 @@
 {
   "name": "crm-whatsapp-ia",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Contesta a tus clientes por WhatsApp en segundos, les da cita y te avisa cuando te toca a ti.",
   "license": "MIT",
   "engines": {
