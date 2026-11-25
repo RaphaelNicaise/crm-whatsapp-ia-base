@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    agentUpgrade: "security",
+  },
   // CLAUDE.md describe el proyecto para Claude Code: Next no debe añadir ni tocar archivos de agentes.
   agentRules: false,
   logging: { incomingRequests: false },
