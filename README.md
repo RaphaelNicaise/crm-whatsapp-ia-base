@@ -4,11 +4,11 @@ Contesta a tus clientes por WhatsApp en segundos, les da cita y te avisa cuando 
 
 Funciona con la API oficial de WhatsApp de Meta, sin intermediarios. Tu web tiene un botón de WhatsApp: tu cliente te escribe con un mensaje ya puesto y tu asistente, con Claude, le contesta al momento, le pregunta lo que falta y le da cita en un hueco libre de tu agenda; cuando hace falta una persona, te lo pasa. Todo queda en un panel. Sirve para cualquier negocio: reformas, inmobiliaria, clínica o el tuyo. Licencia MIT y hecho con Claude Code.
 
-![Hoy: quién te espera, las citas de hoy y mañana y lo pendiente](capturas/hoy.png)
+![Hoy: quién te espera, las citas de hoy y mañana y lo pendiente](docs/capturas/hoy.png)
 
-![Clientes: con tu asistente, con visita y te toca](capturas/clientes.png)
+![Clientes: con tu asistente, con visita y te toca](docs/capturas/clientes.png)
 
-![La ficha de un cliente: la conversación y sus datos](capturas/ficha.png)
+![La ficha de un cliente: la conversación y sus datos](docs/capturas/ficha.png)
 
 ## Instálalo
 
@@ -36,7 +36,7 @@ Abriendo tu CRM en el navegador… Deja esta ventana abierta; para pararlo, Ctrl
 - Pegar el comando otra vez actualiza el CRM sin tocar tus datos, tus claves ni tu `agente.md`.
 - Probado en Mac.
 
-Más detalle, paso a paso: [INSTALAR.md](INSTALAR.md).
+Más detalle, paso a paso: [INSTALAR.md](docs/INSTALAR.md).
 
 ## Se abre tu CRM y te guía
 
@@ -47,7 +47,7 @@ La primera vez se abre la «Puesta en marcha»: cuatro pasos, y cada uno dice si
 3. **Conecta tu WhatsApp.** El token permanente de Meta, la clave secreta de tu app de Meta y el token de ngrok: cada uno se guarda en cuanto lo pegas, así que recargar no los pierde. Con «Conectar», el CRM elige la cuenta y el número, apunta Meta a tu CRM y lo comprueba todo.
 4. **Tu primer WhatsApp.** Ten tu móvil a mano: escribes «Hola» al número de tu negocio y ves cómo contesta tu asistente.
 
-![La puesta en marcha](capturas/puesta-en-marcha.png)
+![La puesta en marcha](docs/capturas/puesta-en-marcha.png)
 
 Si te atascas, «Lo dejo para luego» y sigues otro día. Después, todo está en **Ajustes → Conexiones**: cada línea dice qué falla y, si se puede arreglar solo, tiene un botón «Arreglar».
 
@@ -87,7 +87,7 @@ Doble clic en **«Abrir CRM»**, en la carpeta `crm-whatsapp`. Si ya estaba abie
 
 La pestaña del navegador cuenta quién espera, y un sonido te avisa cuando llega alguien (se apaga en «Sonido de avisos»). En el móvil, el panel también se usa: las columnas se apilan con «Te toca» arriba.
 
-![El panel en el móvil](capturas/movil-clientes.png)
+![El panel en el móvil](docs/capturas/movil-clientes.png)
 
 ## Lo que cuesta
 
@@ -104,7 +104,7 @@ La pestaña del navegador cuenta quién espera, y un sonido te avisa cuando lleg
 - **ngrok:** con el plan gratuito basta.
 - **Tus datos** se guardan en tu ordenador: no hace falta Supabase ni ninguna base de datos de pago.
 - **Notas de voz**, opcionales: se pagan al proveedor que elijas ([Google](https://ai.google.dev/gemini-api/docs/pricing), [Groq](https://groq.com/pricing) u [OpenAI](https://openai.com/api/pricing/)).
-- **Modo servidor:** un servidor pequeño y un dominio. El total al mes está en [DESPLEGAR.md](DESPLEGAR.md#10-lo-que-cuesta-al-mes).
+- **Modo servidor:** un servidor pequeño y un dominio. El total al mes está en [DESPLEGAR.md](docs/DESPLEGAR.md#10-lo-que-cuesta-al-mes).
 
 ## Lo que no hace (todavía)
 
@@ -151,7 +151,7 @@ La pestaña del navegador cuenta quién espera, y un sonido te avisa cuando lleg
 
 ## Modo servidor
 
-Para tener el CRM encendido las 24 horas en tu propio dominio, con HTTPS, la web pública y el panel con contraseña. Se instala con un comando en un servidor con Ubuntu 24.04 (`instalar.sh --servidor crm.tunegocio.com`) y hay una sola contraseña para el panel. La guía está en [DESPLEGAR.md](DESPLEGAR.md). El instalador del servidor se ha probado con `--simular`; la prueba en un servidor de verdad la hace el dueño.
+Para tener el CRM encendido las 24 horas en tu propio dominio, con HTTPS, la web pública y el panel con contraseña. Se instala con un comando en un servidor con Ubuntu 24.04 (`instalar.sh --servidor crm.tunegocio.com`) y hay una sola contraseña para el panel. La guía está en [DESPLEGAR.md](docs/DESPLEGAR.md). El instalador del servidor se ha probado con `--simular`; la prueba en un servidor de verdad la hace el dueño.
 
 ## Probarlo sin Meta: modo prueba
 

@@ -32,13 +32,13 @@ const BIGINT = 20;
 export const ARCHIVO_CERROJO = ".crm-abierto";
 
 /**
- * Qué base de datos se usa, en este orden: BD_LOCAL (pruebas y servidor de pruebas), SUPABASE_DB_URL
+ * Qué base de datos se usa, en este orden: BD_LOCAL (pruebas y servidor de pruebas), DATABASE_URL / SUPABASE_DB_URL
  * y, si no hay ninguna, PGlite en `./datos`. Una variable vacía cuenta como si no estuviera.
  */
 export function queBaseDeDatos(env: Record<string, string | undefined> = process.env): MotorBd {
   const local = env.BD_LOCAL;
   if (local) return { motor: "pglite", carpeta: local };
-  const url = env.SUPABASE_DB_URL;
+  const url = env.DATABASE_URL || env.SUPABASE_DB_URL;
   if (url) return { motor: "supabase", url };
   return { motor: "pglite", carpeta: path.join(/*turbopackIgnore: true*/ process.cwd(), "datos") };
 }
@@ -60,7 +60,7 @@ function conectarSupabase(url: string): Conexion {
     // Las conexiones no se cierran al quedarse paradas: abrir una nueva cuesta casi un segundo.
     idle_timeout: 0,
     connect_timeout: 10,
-    ssl: /@(localhost|127\.0\.0\.1)[:/]/.test(url) ? false : "require",
+    ssl: /sslmode=disable/i.test(url) || /@(localhost|127\.0\.0\.1|postgres|db|host\.docker\.internal)[:/]/.test(url) ? false : "require",
     types: { milisegundos: { to: BIGINT, from: [BIGINT], serialize: (x: number) => String(x), parse: (x: string) => Number(x) } },
     // «CREATE TABLE IF NOT EXISTS» avisa de que ya existía: no hace falta verlo en el registro.
     onnotice: () => {},

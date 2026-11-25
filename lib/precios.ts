@@ -10,6 +10,8 @@ export const FECHA_PRECIOS = "2026-10-06";
 export const PRECIOS: Record<IdModelo, { entrada: number; salida: number; cacheLeida: number }> = {
   "claude-haiku-5-5": { entrada: 0.1, salida: 0.5, cacheLeida: 0.01 },
   "claude-sonnet-5-5": { entrada: 2, salida: 10, cacheLeida: 0.2 },
+  "gpt-4o-mini": { entrada: 0.15, salida: 0.6, cacheLeida: 0.075 },
+  "gemini-2.0-flash": { entrada: 0.1, salida: 0.4, cacheLeida: 0.025 },
 };
 
 /** Escribir en la caché cuesta la entrada × 1,25 (hoy cero: no se pide caché). */

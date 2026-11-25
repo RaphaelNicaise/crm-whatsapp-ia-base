@@ -1,6 +1,7 @@
 # Ningún paquete necesita ejecutar scripts al instalar. Con esto pnpm no pregunta nada ni falla
 # si en el Mac aparece un paquete de plataforma que no se ve desde otro sistema.
 allowBuilds:
+  esbuild: set this to true or false
   sharp: false
   unrs-resolver: false
 strictDepBuilds: false

@@ -20,7 +20,17 @@ export async function POST(request: Request) {
     return Response.json({ ok: false, error: "No se ha entendido la petición" } satisfies ErrorApi, { status: 400 });
   }
   if (typeof cuerpo.modelo !== "string" || !MODELOS.includes(cuerpo.modelo as IdModelo)) {
-    return Response.json({ ok: false, error: "Elige uno de los dos modelos" } satisfies ErrorApi, { status: 400 });
+    return Response.json({ ok: false, error: "Elige un modelo válido" } satisfies ErrorApi, { status: 400 });
+  }
+  if (cuerpo.modelo.startsWith("gpt")) {
+    return process.env.OPENAI_API_KEY
+      ? Response.json({ ok: true })
+      : Response.json({ ok: false, error: "Falta OPENAI_API_KEY en el servidor o en Ajustes", codigo: "claude.clave" } satisfies ErrorApi, { status: 401 });
+  }
+  if (cuerpo.modelo.startsWith("gemini")) {
+    return process.env.GEMINI_API_KEY
+      ? Response.json({ ok: true })
+      : Response.json({ ok: false, error: "Falta GEMINI_API_KEY en el servidor o en Ajustes", codigo: "claude.clave" } satisfies ErrorApi, { status: 401 });
   }
   const r = await comprobarClaveClaude(undefined, cuerpo.modelo);
   if (r.ok) return Response.json({ ok: true });

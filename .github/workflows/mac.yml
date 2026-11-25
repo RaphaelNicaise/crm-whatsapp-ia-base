@@ -18,14 +18,14 @@ jobs:
 
       - name: Los scripts conservan permisos y finales de línea
         run: |
-          test -x instalar.sh && test -x arrancar.sh && test -x comprobar.sh
-          ! grep -lU $'\r' instalar.sh arrancar.sh comprobar.sh
-          bash -n instalar.sh && bash -n arrancar.sh && bash -n comprobar.sh
+          test -x scripts/sh/instalar.sh && test -x scripts/sh/arrancar.sh && test -x scripts/sh/comprobar.sh
+          ! grep -lU $'\r' scripts/sh/instalar.sh scripts/sh/arrancar.sh scripts/sh/comprobar.sh
+          bash -n scripts/sh/instalar.sh && bash -n scripts/sh/arrancar.sh && bash -n scripts/sh/comprobar.sh
 
       - name: instalar.sh, dos veces
         run: |
-          bash instalar.sh --sin-arrancar
-          bash instalar.sh --sin-arrancar
+          bash scripts/sh/instalar.sh --sin-arrancar
+          bash scripts/sh/instalar.sh --sin-arrancar
           test -f .env && test -f .next/BUILD_ID && test -x "Abrir CRM.command"
 
       - name: Tests

@@ -1,6 +1,11 @@
 import { anthropic, type AnthropicLanguageModelOptions } from "@ai-sdk/anthropic";
+import { google } from "@ai-sdk/google";
+import { openai } from "@ai-sdk/openai";
 import { isStepCount, tool, ToolLoopAgent, type LanguageModel, type LanguageModelUsage } from "ai";
+import { randomUUID } from "node:crypto";
 import { z } from "zod";
+import { db, consumoIa } from "./db";
+import { costeUsd } from "./precios";
 import {
   buscarFicha,
   buscarHuecos,
@@ -194,8 +199,32 @@ async function intento(entrada: EntradaAgente, recordatorio?: string): Promise<I
   };
   const disponibles = () => fichas.filter((f) => f.disponible).map((f) => `${f.ref} · ${f.descripcion}`);
 
+  const proveedor =
+    idModelo.startsWith("gpt") || (!process.env.ANTHROPIC_API_KEY && !!process.env.OPENAI_API_KEY)
+      ? "openai"
+      : idModelo.startsWith("gemini") || (!process.env.ANTHROPIC_API_KEY && !process.env.OPENAI_API_KEY && !!process.env.GEMINI_API_KEY)
+        ? "google"
+        : "anthropic";
+
+  const modeloFinal =
+    proveedor === "openai"
+      ? (idModelo.startsWith("gpt") ? idModelo : "gpt-4o-mini")
+      : proveedor === "google"
+        ? (idModelo.startsWith("gemini") ? idModelo : "gemini-2.0-flash")
+        : idModelo;
+
+  const modeloElegido =
+    entrada.modelo ??
+    (proveedor === "openai"
+      ? (openai(modeloFinal) as unknown as LanguageModel)
+      : proveedor === "google"
+        ? (google(modeloFinal) as unknown as LanguageModel)
+        : anthropic(modeloFinal));
+
+  const opcionesProveedor = proveedor === "anthropic" ? { anthropic: opcionesDelModelo(modeloFinal) } : undefined;
+
   const agente = new ToolLoopAgent({
-    model: entrada.modelo ?? anthropic(idModelo),
+    model: modeloElegido,
     instructions: `${entrada.instrucciones}\n\n${contexto(cfg, lead, ofrecidos, fichas, ahora, recordatorio)}`,
     stopWhen: isStepCount(MAXIMO_PASOS),
     // El último paso va sin herramientas: si no, la respuesta podría quedarse sin texto.
@@ -203,7 +232,7 @@ async function intento(entrada: EntradaAgente, recordatorio?: string): Promise<I
     toolCallConcurrency: 1,
     maxRetries: 0,
     maxOutputTokens: 4000,
-    providerOptions: { anthropic: opcionesDelModelo(idModelo) },
+    ...(opcionesProveedor ? { providerOptions: opcionesProveedor } : {}),
     tools: {
       ver_huecos: tool({
         description: `Devuelve huecos de ${cita.singular} reales y libres. Sin parámetros, los dos de siempre. Si el cliente pide un día, una hora o mañana/tarde, pásalo y devuelve los que cumplan. Ofrécelos tal cual, sin cambiar días ni horas.`,
@@ -339,6 +368,23 @@ async function intento(entrada: EntradaAgente, recordatorio?: string): Promise<I
   });
 
   const uso = resultado.usage;
+  if (!process.env.BD_LOCAL && (process.env.DATABASE_URL || process.env.SUPABASE_DB_URL) && uso) {
+    const tokensEntrada = uso.inputTokens ?? 0;
+    const tokensSalida = uso.outputTokens ?? 0;
+    const costo = costeUsd({ entrada: tokensEntrada, cacheLeida: 0, salida: tokensSalida }, modeloFinal);
+    db.insert(consumoIa)
+      .values({
+        id: randomUUID(),
+        leadId: lead.id,
+        proveedor,
+        modelo: modeloFinal,
+        tokensEntrada,
+        tokensSalida,
+        costoUsd: costo.toFixed(6),
+        creadoEn: Date.now(),
+      })
+      .catch(() => {});
+  }
   if (resultado.finishReason === "content-filter") throw conUso(new Error("el modelo ha rechazado la petición"), uso);
   const texto = resultado.text.trim();
   if (!texto) throw conUso(new Error("el modelo no ha devuelto texto"), uso);

@@ -66,9 +66,19 @@ export interface ConfiguracionPerfil {
   spam?: Partial<ValoresSector["spam"]>; portada?: ParcialProfundo<Portada>;
   web?: Partial<Web>;
 }
-export const MODELOS = ["claude-haiku-5-5", "claude-sonnet-5-5"] as const;
+export const MODELOS = [
+  "claude-haiku-5-5",
+  "claude-sonnet-5-5",
+  "gpt-4o-mini",
+  "gemini-2.0-flash",
+] as const;
 export type IdModelo = (typeof MODELOS)[number];
-export const NOMBRES_MODELO: Record<IdModelo, string> = { "claude-haiku-5-5": "Rápido (recomendado)", "claude-sonnet-5-5": "Más cuidadoso, más caro" };
+export const NOMBRES_MODELO: Record<IdModelo, string> = {
+  "claude-haiku-5-5": "Claude Haiku · Preciso con reglas ($0.10 / $0.50)",
+  "claude-sonnet-5-5": "Claude Sonnet · Máxima calidad ($2.00 / $10.00)",
+  "gpt-4o-mini": "GPT-4o Mini · Equilibrado ($0.15 / $0.60)",
+  "gemini-2.0-flash": "Gemini 2.0 Flash · Ultrarrápido ($0.10 / $0.40)",
+};
 export interface ConfiguracionSistema {
   asistente: { activo: boolean; pausadoEn: number | null; modelo: IdModelo | null /* null = MODELO de .env, si no Haiku */ };
   avisos: { comercial: { telefono: string | null /* null = TELEFONO_COMERCIAL de .env; "" = sin aviso */; detalle: "completo" | "minimo" } };

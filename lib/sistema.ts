@@ -324,7 +324,12 @@ const fila = (id: Fila["id"], nombre: string, estado: EstadoFila, detalle: strin
 const arreglarPaso = (paso: PasoPuesta): Fila["accion"] => ({ texto: "Arreglar", paso });
 
 /** Cómo se dice cada modelo en una línea: «claude-haiku-5-5» → «Claude Haiku 5.5 · rápido». */
-const CARACTER_MODELO: Record<IdModelo, string> = { "claude-haiku-5-5": "rápido", "claude-sonnet-5-5": "más cuidadoso" };
+const CARACTER_MODELO: Record<IdModelo, string> = {
+  "claude-haiku-5-5": "rápido",
+  "claude-sonnet-5-5": "más cuidadoso",
+  "gpt-4o-mini": "equilibrado",
+  "gemini-2.0-flash": "ultrarrápido",
+};
 
 function etiquetaModelo(modelo: IdModelo): string {
   const [marca, familia, ...version] = modelo.split("-");
@@ -462,9 +467,11 @@ async function filaDatos(): Promise<Fila> {
   const ms = Date.now() - inicio;
   const clientes = total === 1 ? "1 cliente" : `${total} clientes`;
   if (process.env.BD_LOCAL) return fila("datos", nombre, "ok", `Datos de pruebas en este ordenador · ${clientes} · ${ms} ms`);
-  if (process.env.SUPABASE_DB_URL) {
+  const urlPostgres = process.env.DATABASE_URL || process.env.SUPABASE_DB_URL;
+  if (urlPostgres) {
     if (ms > LENTO_MS) return fila("datos", nombre, "atencion", "Va lento: cada respuesta tarda más");
-    return fila("datos", nombre, "ok", `Tus datos se guardan en Supabase · ${clientes} · ${ms} ms`);
+    const nombreServicio = /supabase/i.test(urlPostgres) ? "Supabase" : "PostgreSQL";
+    return fila("datos", nombre, "ok", `Tus datos se guardan en ${nombreServicio} · ${clientes} · ${ms} ms`);
   }
   if (modoServidor()) return fila("datos", nombre, "ok", "Tus datos se guardan en tu servidor y se copian cada día");
   return fila("datos", nombre, "ok", "Tus datos se guardan en este ordenador, en la carpeta datos/. Haz copia de esa carpeta.");

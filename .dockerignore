@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.github
+datos
+copias
+logs
+.herramientas
+.env*
+!.env.example
+*.log
+capturas
