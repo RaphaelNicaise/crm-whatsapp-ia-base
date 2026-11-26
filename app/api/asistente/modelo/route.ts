@@ -25,16 +25,17 @@ export async function POST(request: Request) {
   if (cuerpo.modelo.startsWith("gpt")) {
     return process.env.OPENAI_API_KEY
       ? Response.json({ ok: true })
-      : Response.json({ ok: false, error: "Falta OPENAI_API_KEY en el servidor o en Ajustes", codigo: "claude.clave" } satisfies ErrorApi, { status: 401 });
+      : Response.json({ ok: false, error: "Configura tu OPENAI_API_KEY en el campo de abajo", faltaClave: true });
   }
   if (cuerpo.modelo.startsWith("gemini")) {
     return process.env.GEMINI_API_KEY
       ? Response.json({ ok: true })
-      : Response.json({ ok: false, error: "Falta GEMINI_API_KEY en el servidor o en Ajustes", codigo: "claude.clave" } satisfies ErrorApi, { status: 401 });
+      : Response.json({ ok: false, error: "Configura tu GEMINI_API_KEY en el campo de abajo", faltaClave: true });
+  }
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return Response.json({ ok: false, error: "Configura tu ANTHROPIC_API_KEY en el campo de abajo", faltaClave: true });
   }
   const r = await comprobarClaveClaude(undefined, cuerpo.modelo);
   if (r.ok) return Response.json({ ok: true });
-  if (r.error.codigo === "claude.clave") return errorApi(401, r.error);
-  if (r.error.codigo === "claude.modelo") return errorApi(404, r.error);
-  return errorApi(502, r.error);
+  return Response.json({ ok: false, error: r.error.titulo, faltaClave: true });
 }

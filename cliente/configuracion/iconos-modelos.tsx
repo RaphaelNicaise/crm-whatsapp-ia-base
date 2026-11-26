@@ -23,7 +23,7 @@ export function IconoGemini({ className = "size-5" }: { className?: string }): J
 export function IconoClaude({ className = "size-5" }: { className?: string }): JSX.Element {
   return (
     <img
-      src="/iconos/claude.png"
+      src="/iconos/claude.png?v=3"
       alt="Anthropic Claude"
       className={`${className} object-contain`}
       aria-hidden="true"

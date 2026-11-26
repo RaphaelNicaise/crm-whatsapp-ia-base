@@ -97,20 +97,19 @@ function SelectorModeloYConsumo({ bd, datos, refrescar }: PropsBloque & { bd: Bd
   }, []);
 
   const elegirModelo = async (nuevo: IdModelo) => {
-    const anterior = modelo;
     setModelo(nuevo);
-    const ok = await g.ejecutar(async () => {
-      const check = await fetch("/api/asistente/modelo", {
+    await g.ejecutar(async () => {
+      const r = await guardarCampo("sistema.asistente.modelo", nuevo);
+      if (!r.ok) return { ok: false, error: r.error };
+      // Notificar validación en segundo plano sin revertir selección
+      void fetch("/api/asistente/modelo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ modelo: nuevo }),
-      }).then((r) => r.json() as Promise<{ ok: boolean; error?: string }>);
-      if (!check.ok) return { ok: false, error: check.error ?? "No se pudo validar la clave de este modelo" };
-      const r = await guardarCampo("sistema.asistente.modelo", nuevo);
-      return r.ok ? { ok: true } : { ok: false, error: r.error };
+      });
+      return { ok: true };
     });
-    if (!ok) setModelo(anterior);
-    else void refrescar();
+    void refrescar();
   };
 
   const p = PRECIOS[modelo];
