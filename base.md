@@ -38,7 +38,7 @@
 ### 4. Navegación en Ajustes y Multi-Modelo con Iconos
 - **Vista Configuración (`cliente/vista-configuracion.tsx`):** Navegación lateral de tabs intacta como en la versión previa, con icono oficial de WhatsApp en la sección de mensajería.
 - **Botón Conectar/Configurar (`cliente/configuracion/conexiones.tsx`):** Sustituido "Arreglar" por "Conectar" / "Configurar".
-- **Selector de Modelos (`cliente/configuracion/asistente.tsx`):** Selección visual con íconos vectoriales oficiales de OpenAI, Google Gemini y Anthropic Claude.
+- **Selector de Modelos (`cliente/configuracion/asistente.tsx`):** Selección visual con íconos oficiales (OpenAI, Google Gemini y la chispa oficial de Anthropic Claude provista en `/iconos/claude.png`).
 - **Buscador Paleta (`cliente/paleta.tsx`):** Placeholder "Buscar cliente o funcionalidad…" y foco automático directo al input del modal al abrir.
 
 ### 3. Cotizaciones y Gestión de Ventas
