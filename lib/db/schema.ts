@@ -217,3 +217,65 @@ export type NotaModel = typeof notas.$inferSelect;
 export type TareaModel = typeof tareas.$inferSelect;
 export type ActividadModel = typeof actividad.$inferSelect;
 export type AjustesModel = typeof ajustes.$inferSelect;
+
+/**
+ * Tabla: productos
+ * Catálogo de productos y servicios ofrecidos por el negocio.
+ */
+export const productos = pgTable("productos", {
+  id: text("id").primaryKey(),
+  nombre: text("nombre").notNull(),
+  sku: text("sku"),
+  descripcion: text("descripcion"),
+  categoria: text("categoria"),
+  precio: integer("precio").notNull(),
+  stock: integer("stock").notNull().default(0),
+  activo: boolean("activo").notNull().default(true),
+  creadoEn: bigint("creado_en", { mode: "number" }).notNull(),
+  actualizadoEn: bigint("actualizado_en", { mode: "number" }).notNull(),
+});
+
+/**
+ * Tabla: ventas
+ * Cotizaciones y órdenes de venta asociadas a un lead.
+ */
+export const ventas = pgTable("ventas", {
+  id: text("id").primaryKey(),
+  leadId: text("lead_id")
+    .notNull()
+    .references(() => leads.id, { onDelete: "cascade" }),
+  estado: text("estado").notNull().default("borrador"), // 'borrador' | 'pendiente_pago' | 'pagada' | 'cancelada'
+  total: integer("total").notNull().default(0),
+  notas: text("notas"),
+  enlacePago: text("enlace_pago"),
+  comprobanteUrl: text("comprobante_url"),
+  creadoEn: bigint("creado_en", { mode: "number" }).notNull(),
+  pagadoEn: bigint("pagado_en", { mode: "number" }),
+});
+
+/**
+ * Tabla: lineas_venta
+ * Ítems asociados a una cotización o venta.
+ */
+export const lineasVenta = pgTable("lineas_venta", {
+  id: text("id").primaryKey(),
+  ventaId: text("venta_id")
+    .notNull()
+    .references(() => ventas.id, { onDelete: "cascade" }),
+  productoId: text("producto_id")
+    .notNull()
+    .references(() => productos.id, { onDelete: "restrict" }),
+  cantidad: integer("cantidad").notNull().default(1),
+  precioUnitario: integer("precio_unitario").notNull(),
+  subtotal: integer("subtotal").notNull(),
+});
+
+export type ProductoModel = typeof productos.$inferSelect;
+export type NuevoProductoModel = typeof productos.$inferInsert;
+
+export type VentaModel = typeof ventas.$inferSelect;
+export type NuevaVentaModel = typeof ventas.$inferInsert;
+
+export type LineaVentaModel = typeof lineasVenta.$inferSelect;
+export type NuevaLineaVentaModel = typeof lineasVenta.$inferInsert;
+

@@ -5,6 +5,7 @@ import { isStepCount, tool, ToolLoopAgent, type LanguageModel, type LanguageMode
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { db, consumoIa } from "./db";
+import { listarProductosMemoria } from "./db/repositorios/productos";
 import { costeUsd } from "./precios";
 import {
   buscarFicha,
@@ -31,6 +32,32 @@ import { cap, formas, nombresInternos, normalizarClave, seccionesDelPrompt, type
 // El modelo solo conversa. Qué huecos hay, qué está reservado y qué piso se puede visitar lo
 // decide el código: las herramientas trabajan sobre una copia del estado y devuelven mutaciones.
 // Si la ejecución se cancela, no queda ningún rastro.
+
+export async function ejecutarConsultaCatalogo(args: { termino?: string }) {
+  const lista = await listarProductosMemoria({
+    busqueda: args.termino,
+    soloActivos: true,
+  });
+
+  if (lista.length === 0) {
+    return {
+      encontrados: [],
+      mensaje: "No se encontraron productos disponibles con ese criterio de búsqueda.",
+    };
+  }
+
+  return {
+    encontrados: lista.map((p) => ({
+      id: p.id,
+      nombre: p.nombre,
+      precio: p.precio,
+      stock: p.stock,
+      descripcion: p.descripcion ?? "",
+      disponible: p.stock > 0,
+    })),
+    mensaje: `Se encontraron ${lista.length} producto(s).`,
+  };
+}
 
 const MAXIMO_PASOS = 4;
 const TIEMPO_MAXIMO_MS = 20_000;
@@ -356,6 +383,16 @@ async function intento(entrada: EntradaAgente, recordatorio?: string): Promise<I
           mutaciones.push({ t: "estado", leadId: lead.id, estado: "spam", ts: ahora.getTime(), motivo });
           eventos.push(`Spam: ${lead.nombre}. ${motivo}`);
           return { ok: true };
+        },
+      }),
+      consultar_catalogo: tool({
+        description:
+          "Consulta el catálogo de productos y precios vigentes. Usa esta herramienta cuando el cliente pregunte por precios, disponibilidad o detalles de algún producto.",
+        inputSchema: z.object({
+          termino: z.string().describe("Palabra clave, nombre o categoría del producto que busca el cliente"),
+        }),
+        execute: async ({ termino }) => {
+          return await ejecutarConsultaCatalogo({ termino });
         },
       }),
     },

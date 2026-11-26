@@ -15,6 +15,7 @@ import { anadirNota, anadirTarea, borrarCliente, borrarTarea, cambiarTarea, cerr
 import { useNegocio } from "./negocio";
 import { sinCorte } from "./piezas";
 import { BOTON_PEQUENO, Telefono } from "./telefono";
+import { WidgetVentaLead } from "./widget-venta-lead";
 
 // La ficha del cliente, a la derecha de la conversación: primero lo que hace falta para decidir
 // (qué quiere, qué viene ahora y cuánto vale), luego cómo contactarle, sus datos, tus notas y el
@@ -1006,6 +1007,7 @@ export function Ficha({ lead, ahora, refrescar, cerrar }: { lead: Lead; ahora: n
             <PrimerWhatsApp lead={lead} />
           </div>
           <Datos lead={lead} />
+          <WidgetVentaLead leadId={lead.id} />
           <Notas lead={lead} ahora={ahora} refrescar={refrescar} />
           <Historial lead={lead} />
         </>

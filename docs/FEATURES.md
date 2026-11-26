@@ -84,7 +84,7 @@ Este documento detalla todas las funcionalidades, integraciones, módulos técni
 ## 5. Base de Datos, Infraestructura y Seguridad
 
 * **PostgreSQL 17 + Drizzle ORM:**
-  * Schema tipado completo en `lib/db/schema.ts` con 10 tablas (`leads`, `mensajes`, `visitas`, `notas`, `tareas`, `actividad`, `proyectos`, `mensajes_procesados`, `ajustes`, `consumo_ia`) y migraciones en `drizzle/`.
+  * Schema tipado completo en `lib/db/schema.ts` con 13 tablas (`leads`, `mensajes`, `visitas`, `notas`, `tareas`, `actividad`, `proyectos`, `mensajes_procesados`, `ajustes`, `consumo_ia`, `productos`, `ventas`, `lineas_venta`) y migraciones en `drizzle/`.
   * Compatible con PostgreSQL en Docker, Supabase o Neon (`DATABASE_URL` / `SUPABASE_DB_URL`), además de respaldo local embebido (`PGlite`).
   * Comandos incluidos: `pnpm run db:push`, `pnpm run db:studio`, `pnpm run db:generate`.
 * **Exportación y Backups:**
@@ -98,4 +98,24 @@ Este documento detalla todas las funcionalidades, integraciones, módulos técni
   * Alta de contraseña inicial mediante código de un solo uso (`CODIGO_ALTA`).
   * Censura automática de API keys en logs y respuestas HTTP (`lib/claves.ts`, `lib/sistema.ts`).
 * **Calidad y Testing:**
-  * Suite con más de 1.600 tests unitarios en Vitest (`lib/__tests__/`), incluyendo tests de invariantes arquitectónicos y seguridad (`invariantes.test.ts`).
+  * Suite completa de tests unitarios en Vitest (`lib/__tests__/`), incluyendo tests de invariantes arquitectónicos, seguridad y módulos de ventas.
+
+---
+
+## 6. Catálogo de Productos, Cotizaciones y Ventas Conversacionales
+
+* **Catálogo de Productos y Control de Stock (`lib/db/repositorios/productos.ts`):**
+  * Tabla `productos` tipada con ID, nombre, SKU, categoría, precio, stock y estado activo.
+  * Búsqueda ágil textual de artículos y actualización atómica de existencias.
+  * API REST: `GET /api/productos`, `POST /api/productos`.
+* **Cotizaciones y Gestión de Ventas (`lib/db/repositorios/ventas.ts`):**
+  * Tablas `ventas` y `lineas_venta` vinculadas al lead con estados (`borrador`, `pendiente_pago`, `pagada`, `cancelada`), cálculo automático de totales y líneas de desglose.
+  * API REST: `GET /api/ventas?leadId=...`, `POST /api/ventas`.
+* **Cotizador Rápido en Ficha del Lead (`cliente/widget-venta-lead.tsx`):**
+  * Selector reactivo de productos integrado directamente en la ficha del lead (`cliente/ficha.tsx`).
+  * Permite armar el pedido en 2 clics, calcular el total y confirmar la cotización de forma instantánea.
+* **Tool del Asistente IA (`consultar_catalogo` en `lib/agente.ts`):**
+  * Capacidad determinista para que la IA consulte precios y existencias en tiempo real durante la charla en WhatsApp, respondiendo con datos vigentes sin alucinaciones.
+* **Validador Multimodal y Conciliación de Transferencias (`lib/vision-comprobantes.ts`):**
+  * Extracción y validación estructurada de comprobantes de pago por transferencia (monto, fecha, referencia bancaria) para conciliar automáticamente contra ventas pendientes.
+

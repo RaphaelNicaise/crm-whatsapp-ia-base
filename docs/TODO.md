@@ -1,5 +1,7 @@
 # Roadmap y Features Pendientes (`TODO`)
 
+> **Completado recientemente:** Módulo de Catálogo de Productos, Control de Stock, Cotizaciones, Gestión de Ventas y Validador de Comprobantes por IA (migrado a `docs/FEATURES.md`).
+
 Lista de funcionalidades, integraciones y mejoras técnicas planificadas para evolucionar el CRM hacia un producto de agencia / SaaS completo.
 
 ---
