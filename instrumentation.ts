@@ -106,16 +106,6 @@ export async function register() {
       }
     }
     if (process.env.BD_LOCAL) return; // pruebas: nada
-    // Modo prueba (WhatsApp por QR, solo en local): si está elegido y preparado, su puente vuelve a
-    // arrancar con el CRM. Nunca impide que el servidor arranque.
-    if (!dominio) {
-      try {
-        const [modoPrueba, puente] = await Promise.all([import("./lib/modo-prueba"), import("./lib/modo-prueba-puente")]);
-        if (modoPrueba.modoWhatsApp() === "prueba" && puente.herramientaLista()) void puente.arrancarPuente().catch(() => undefined);
-      } catch (error) {
-        avisoRojo(`No se ha podido arrancar el modo prueba: ${error instanceof Error ? error.name : "error"}`);
-      }
-    }
     const [tunel, meta, http] = await Promise.all([import("./lib/tunel"), import("./lib/meta"), import("node:http")]);
     // En modo servidor, la pregunta de «¿ya estás?» va con el Host del dominio (lo exige proxy.ts).
     const conHost = dominio && tunel.modoServidor() ? { host: dominio, pedir: http.request } : undefined;

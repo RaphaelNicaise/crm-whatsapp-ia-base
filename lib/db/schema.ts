@@ -10,6 +10,20 @@ import {
 } from "drizzle-orm/pg-core";
 
 /**
+ * Tabla: usuarios
+ * Operadores y administradores del CRM (soporte multi-usuario y asignación de leads).
+ */
+export const usuarios = pgTable("usuarios", {
+  id: text("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  nombre: text("nombre").notNull(),
+  passwordHash: text("password_hash").notNull(),
+  rol: text("rol").notNull().default("operador"), // 'admin' | 'operador'
+  activo: boolean("activo").notNull().default(true),
+  creadoEn: bigint("creado_en", { mode: "number" }).notNull(),
+});
+
+/**
  * Tabla: leads
  * Almacena los prospectos y clientes que ingresan por WhatsApp o formulario web.
  */
@@ -42,6 +56,7 @@ export const leads = pgTable("leads", {
   cierreEn: bigint("cierre_en", { mode: "number" }),
   motivoCierre: text("motivo_cierre"),
   vueltaVistaEn: bigint("vuelta_vista_en", { mode: "number" }),
+  asignadoA: text("asignado_a").references(() => usuarios.id, { onDelete: "set null" }),
 });
 
 /**
@@ -186,6 +201,9 @@ export type ConsumoIaModel = typeof consumoIa.$inferSelect;
 export type NuevoConsumoIaModel = typeof consumoIa.$inferInsert;
 
 // Tipos inferidos por Drizzle
+export type UsuarioModel = typeof usuarios.$inferSelect;
+export type NuevoUsuarioModel = typeof usuarios.$inferInsert;
+
 export type LeadModel = typeof leads.$inferSelect;
 export type NuevoLeadModel = typeof leads.$inferInsert;
 

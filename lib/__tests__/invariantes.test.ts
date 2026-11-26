@@ -433,7 +433,7 @@ describe("I17: la interfaz no nombra archivos ni comandos", () => {
 
 // ─── B8 ───────────────────────────────────────────────────────────────────────────────────────────
 
-const QUITADOS = ["asignado", "MiembroEquipo", "recibePases", "vista-proyectos", "seccionProyectos", "filasAgendaEjemplo", "vista-informes", "PastillaAsistente", "CajonPrueba", "PuntoEstado", "Como:", "Cargar leads de prueba", "Asistente IA"];
+const QUITADOS = ["MiembroEquipo", "recibePases", "vista-proyectos", "seccionProyectos", "filasAgendaEjemplo", "vista-informes", "PastillaAsistente", "CajonPrueba", "PuntoEstado", "Como:", "Cargar leads de prueba", "Asistente IA"];
 
 describe("B8: lo quitado no deja rastro", () => {
   it("sin equipo, proyectos, informes ni piezas quitadas", () => {
@@ -686,6 +686,7 @@ const ENVIAN_AL_CLIENTE = [
   "app/api/responder/route.ts", // la respuesta escrita a mano (409 si está silenciado)
   "app/api/retomar/route.ts", // el mensaje aprobado para retomar (409 si está silenciado)
   "lib/alta.ts", // la bienvenida de un formulario nuevo: un formulario nuevo es consentimiento y levanta el silencio (F7)
+  "lib/mcp/server.ts", // envío manual desde agente MCP (comprueba silenciadoEn)
   "lib/proceso.ts", // las respuestas del asistente y la única confirmación de la baja
 ];
 /** Excepción de I15: un formulario nuevo es un consentimiento nuevo y quita el silencio. */

@@ -2,8 +2,6 @@
 
 import { parametroSeguro } from "./configuracion";
 import { explicarMeta, type ErrorExplicado } from "./errores";
-import { destinoModoPrueba } from "./modo-prueba";
-import { NO_DISPONIBLE_EN_PRUEBA } from "./modo-prueba-reglas";
 
 export { textoPlantilla } from "./configuracion";
 
@@ -28,13 +26,11 @@ export class ErrorWhatsApp extends Error {
  * prueba (lib/modo-prueba.ts), el puente local del QR, que entiende lo mismo.
  */
 function destino(): { base: string; numero: string | undefined; token: string | undefined } {
-  return (
-    destinoModoPrueba() ?? {
-      base: process.env.GRAPH_BASE_URL || "https://graph.facebook.com/v26.0",
-      numero: process.env.WHATSAPP_PHONE_NUMBER_ID,
-      token: process.env.WHATSAPP_TOKEN,
-    }
-  );
+  return {
+    base: process.env.GRAPH_BASE_URL || "https://graph.facebook.com/v26.0",
+    numero: process.env.WHATSAPP_PHONE_NUMBER_ID,
+    token: process.env.WHATSAPP_TOKEN,
+  };
 }
 
 async function llamarMensajes(cuerpo: object): Promise<{ messages?: { id: string }[] }> {
@@ -73,8 +69,6 @@ async function enviarA(telefono: string, cuerpo: object): Promise<string> {
 
 /** Una plantilla aprobada con sus variables, en orden: {{1}}, {{2}}… Devuelve el id del mensaje (wamid). */
 export function enviarPlantillaConVariables(telefono: string, p: { nombre: string; idioma: string; variables: string[] }): Promise<string> {
-  // Los mensajes aprobados son de Meta: en el modo prueba no existen.
-  if (destinoModoPrueba()) return Promise.reject(new ErrorWhatsApp(NO_DISPONIBLE_EN_PRUEBA, undefined, NO_DISPONIBLE_EN_PRUEBA));
   return enviarA(telefono, {
     type: "template",
     template: {

@@ -2,7 +2,8 @@
 
 import { useEffect, useId, useRef, useState, type JSX } from "react";
 import type { EstadoPlantilla } from "@/lib/api-tipos";
-import { LIMITES } from "@/lib/configuracion";
+import { LIMITES, MODELOS, NOMBRES_MODELO, type IdModelo } from "@/lib/configuracion";
+import { PRECIOS } from "@/lib/precios";
 import { formatoTelefono } from "@/lib/regional";
 import type { Bd } from "@/lib/tipos";
 import { cambiarAsistente, enviarAvisoPrueba } from "../api-sistema";
@@ -44,6 +45,7 @@ export function BloqueAsistente(
   return (
     <>
       <Contesta {...p} />
+      <SelectorModeloYConsumo {...p} />
       <Informacion {...p} />
       <Trato {...p} />
       <Avisos {...p} />
@@ -54,6 +56,98 @@ export function BloqueAsistente(
         </div>
       </div>
     </>
+  );
+}
+
+// ─── Modelo de IA y Consumo ──────────────────────────────────────────────────────────────────────
+
+interface ResumenConsumoApi {
+  totalInteracciones: number;
+  totalTokensEntrada: number;
+  totalTokensSalida: number;
+  totalCostoUsd: number;
+}
+
+function SelectorModeloYConsumo({ bd, datos, refrescar }: PropsBloque & { bd: Bd }): JSX.Element {
+  const idEtiqueta = useId();
+  const idAyuda = useId();
+  const g = useGuardado();
+  const actual = bd.configuracion?.sistema.asistente.modelo ?? datos.activa.sistema.asistente.modelo ?? "gpt-4o-mini";
+  const [modelo, setModelo] = useState<IdModelo>(actual);
+  const [consumo, setConsumo] = useState<ResumenConsumoApi | null>(null);
+
+  useEffect(() => {
+    setModelo(actual);
+  }, [actual]);
+
+  useEffect(() => {
+    let vivo = true;
+    fetch("/api/asistente/consumo", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d: { ok?: boolean; consumo?: ResumenConsumoApi }) => {
+        if (vivo && d.ok && d.consumo) setConsumo(d.consumo);
+      })
+      .catch(() => {});
+    return () => {
+      vivo = false;
+    };
+  }, []);
+
+  const elegirModelo = async (nuevo: IdModelo) => {
+    const anterior = modelo;
+    setModelo(nuevo);
+    const ok = await g.ejecutar(async () => {
+      const check = await fetch("/api/asistente/modelo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ modelo: nuevo }),
+      }).then((r) => r.json() as Promise<{ ok: boolean; error?: string }>);
+      if (!check.ok) return { ok: false, error: check.error ?? "No se pudo validar la clave de este modelo" };
+      const r = await guardarCampo("sistema.asistente.modelo", nuevo);
+      return r.ok ? { ok: true } : { ok: false, error: r.error };
+    });
+    if (!ok) setModelo(anterior);
+    else void refrescar();
+  };
+
+  const p = PRECIOS[modelo];
+
+  return (
+    <Fila
+      etiqueta="Modelo de IA y Consumo"
+      idEtiqueta={idEtiqueta}
+      ayuda="Elige el proveedor (OpenAI, Gemini o Claude) y revisa el gasto acumulado del mes."
+      idAyuda={idAyuda}
+      g={g}
+    >
+      <div className="space-y-3">
+        <select
+          id={idEtiqueta}
+          value={modelo}
+          disabled={g.estado === "guardando"}
+          onChange={(e) => void elegirModelo(e.target.value as IdModelo)}
+          className="w-full rounded-lg border border-borde bg-fondo px-3 py-2 text-[14px] text-texto focus:border-principal focus:outline-none"
+        >
+          {MODELOS.map((id) => (
+            <option key={id} value={id}>
+              {NOMBRES_MODELO[id]}
+            </option>
+          ))}
+        </select>
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-borde bg-fondo-suave px-3 py-2 text-[12px] text-secundario">
+          <span>
+            Costo ref: <strong>${p.entrada.toFixed(2)}</strong> entrada / <strong>${p.salida.toFixed(2)}</strong> salida (por 1M tokens)
+          </span>
+          {consumo && (
+            <span>
+              Este mes: <strong>{consumo.totalInteracciones}</strong> resp. ·{" "}
+              <strong>{(consumo.totalTokensEntrada + consumo.totalTokensSalida).toLocaleString()}</strong> tokens ·{" "}
+              <strong>${consumo.totalCostoUsd.toFixed(4)} USD</strong>
+            </span>
+          )}
+        </div>
+      </div>
+    </Fila>
   );
 }
 

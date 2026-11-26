@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
   // Los dos motores de la base de datos se cargan tal cual desde node_modules: PGlite trae su
   // propio Postgres en WebAssembly y no se puede empaquetar. El túnel de ngrok es un módulo
   // nativo y también se carga tal cual.
-  serverExternalPackages: ["postgres", "@electric-sql/pglite", "@ngrok/ngrok"],
+  serverExternalPackages: ["postgres"],
   turbopack: {
     rules: {
       "*.css": {

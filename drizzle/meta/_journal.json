@@ -15,6 +15,13 @@
       "when": 1795648207418,
       "tag": "0001_fast_the_watchers",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795664132628,
+      "tag": "0002_burly_maggott",
+      "breakpoints": true
     }
   ]
 }

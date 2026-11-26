@@ -13,9 +13,7 @@ import { configuracionActiva, configuracionParaPintar } from "./configuracion-se
 import { explicar, explicarBd, type ErrorExplicado } from "./errores";
 import { ultimosWebhooks } from "./eventos";
 import { appDelToken, caducidad, comprobarFirma, comprobarSecreto, estadoConexionMeta, estadoPlantilla, numeroDelNegocio, numeros } from "./meta";
-import { leerModoPrueba, modoWhatsApp } from "./modo-prueba";
-import { consultarPuente, ultimoEstadoPuente } from "./modo-prueba-puente";
-import { enmascararVinculado } from "./modo-prueba-reglas";
+import { modoWhatsApp } from "./modo-prueba";
 import { configuracionPorDefecto } from "./presets";
 import { estadoAcceso, estadoTunel, modoServidor, tokenNgrok, urlPublica } from "./tunel";
 
@@ -274,14 +272,6 @@ async function calcularPuesta(): Promise<Puesta> {
     claude = !(r && !r.ok && r.error.codigo === "claude.clave");
   }
 
-  // Modo prueba: WhatsApp está hecho con el móvil vinculado y la lista de números permitidos.
-  // Lo del puente se pregunta detrás, sin esperar, como lo de Meta.
-  if (modoWhatsApp() === "prueba") {
-    void consultarPuente().catch(() => undefined);
-    const vinculado = ultimoEstadoPuente().fase === "conectado" && (leerModoPrueba()?.permitidos.length ?? 0) > 0;
-    return { negocio: p.negocio, claude, whatsapp: vinculado, mensajes: true, primerMensaje: p.primerMensaje };
-  }
-
   let whatsapp = metaConectada();
   if (whatsapp) {
     const r = sinEsperar("app", claveToken(), preguntarApp, vidaApp);
@@ -358,30 +348,8 @@ async function leerApp(refrescar: boolean): Promise<ConTiempo<ResultadoApp>> {
   return comprobar("app", claveToken(), preguntarApp, vidaApp, refrescar);
 }
 
-/** Modo prueba: WhatsApp es el móvil vinculado por QR, siempre en ámbar porque no es la vía oficial. */
-async function filaWhatsAppPrueba(config: ConfiguracionResuelta): Promise<Fila> {
-  const nombre = "WhatsApp";
-  const puente = await consultarPuente();
-  if (puente.fase !== "conectado" || !puente.numero) {
-    return fila("whatsapp", nombre, "error", "Modo prueba · sin vincular: escanea el QR", arreglarPaso("whatsapp"));
-  }
-  if ((leerModoPrueba()?.permitidos.length ?? 0) === 0) {
-    return fila("whatsapp", nombre, "error", "Modo prueba · falta la lista de números permitidos", arreglarPaso("whatsapp"));
-  }
-  return fila("whatsapp", nombre, "atencion", `Modo prueba · ${enmascararVinculado(puente.numero, config.regional.prefijo)} · no oficial`);
-}
-
-async function filaMensajesPrueba(): Promise<Fila> {
-  const nombre = "Mensajes que llegan a este ordenador";
-  if (ultimoEstadoPuente().fase !== "conectado") return fila("mensajes", nombre, "atencion", "Primero vincula el móvil de pruebas", arreglarPaso("whatsapp"));
-  const avisos = ultimosWebhooks();
-  if (avisos.valido !== null) return fila("mensajes", nombre, "ok", `Llegan del móvil de pruebas · último ${hace(avisos.valido)}`);
-  return fila("mensajes", nombre, "ok", "Llegan del móvil de pruebas, solo de los números permitidos");
-}
-
 async function filaWhatsApp(config: ConfiguracionResuelta, refrescar: boolean): Promise<Fila> {
   const nombre = "WhatsApp";
-  if (modoWhatsApp() === "prueba") return filaWhatsAppPrueba(config);
   if (!metaConectada()) return fila("whatsapp", nombre, "error", "Sin conectar", arreglarPaso("whatsapp"));
   const app = await leerApp(refrescar);
   if (app === TIEMPO || app === "red") return fila("whatsapp", nombre, "atencion", NO_SE_HA_PODIDO);
@@ -403,7 +371,6 @@ async function filaWhatsApp(config: ConfiguracionResuelta, refrescar: boolean): 
 }
 
 async function filaMensajes(refrescar: boolean): Promise<Fila> {
-  if (modoWhatsApp() === "prueba") return filaMensajesPrueba();
   const servidor = modoServidor();
   const nombre = servidor ? "Mensajes que llegan a tu servidor" : "Mensajes que llegan a este ordenador";
   if (!metaConectada()) return fila("mensajes", nombre, "atencion", "Primero conecta tu WhatsApp", arreglarPaso("whatsapp"));
