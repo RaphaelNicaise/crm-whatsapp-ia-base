@@ -1,9 +1,9 @@
 "use client";
 
-import { Bot, Building2, CalendarDays, Globe, KeyRound, Plug, Settings2, Users, type LucideIcon } from "lucide-react";
+import { Bot, Building2, CalendarDays, Globe, KeyRound, Layers, Plug, Settings2, Users, type LucideIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type JSX } from "react";
 import type { EstadoPlantilla } from "@/lib/api-tipos";
-import type { IdSeccionConfiguracion } from "@/lib/configuracion";
+import { SECCIONES_CONFIGURACION, type IdSeccionConfiguracion } from "@/lib/configuracion";
 import type { Bd } from "@/lib/tipos";
 import { leerPlantillas } from "./api-sistema";
 import { confirmar } from "./confirmaciones";
@@ -12,7 +12,7 @@ import { useConfiguracion } from "./configuracion/api";
 import { BloqueAsistente } from "./configuracion/asistente";
 import { Avanzado } from "./configuracion/avanzado";
 import { Conexiones } from "./configuracion/conexiones";
-import { Bloque, BOTON } from "./configuracion/controles";
+import { Bloque, BOTON, menosMovimiento } from "./configuracion/controles";
 import { BloqueEquipo } from "./configuracion/equipo";
 import { BloqueMcp } from "./configuracion/mcp";
 import { BloqueNegocio } from "./configuracion/negocio";
@@ -20,17 +20,24 @@ import { Pie } from "./configuracion/pie";
 import { BloqueWeb } from "./configuracion/web";
 import { irA } from "./navegacion";
 
-type TabAjustes = "negocio" | "asistente" | "agenda" | "whatsapp" | "equipo" | "mcp" | "web" | "avanzado";
+type TabFiltro = "todas" | "negocio" | "asistente" | "agenda" | "whatsapp" | "equipo" | "mcp" | "web" | "avanzado";
 
-const TABS: { id: TabAjustes; nombre: string; Icono: LucideIcon }[] = [
+interface ItemNav {
+  id: TabFiltro;
+  nombre: string;
+  Icono: LucideIcon;
+}
+
+const ITEMS_NAV: ItemNav[] = [
+  { id: "todas", nombre: "Ver todo", Icono: Layers },
   { id: "negocio", nombre: "Negocio", Icono: Building2 },
-  { id: "asistente", nombre: "Tu Asistente y Modelos", Icono: Bot },
-  { id: "agenda", nombre: "Agenda y Horarios", Icono: CalendarDays },
-  { id: "whatsapp", nombre: "WhatsApp / Conexiones", Icono: KeyRound },
-  { id: "equipo", nombre: "Equipo y Usuarios", Icono: Users },
-  { id: "mcp", nombre: "Servidor MCP", Icono: Plug },
-  { id: "web", nombre: "Web Pública", Icono: Globe },
-  { id: "avanzado", nombre: "Avanzado y Datos", Icono: Settings2 },
+  { id: "asistente", nombre: "Tu Asistente", Icono: Bot },
+  { id: "agenda", nombre: "Agenda", Icono: CalendarDays },
+  { id: "whatsapp", nombre: "WhatsApp", Icono: KeyRound },
+  { id: "equipo", nombre: "Equipo", Icono: Users },
+  { id: "mcp", nombre: "MCP", Icono: Plug },
+  { id: "web", nombre: "Web", Icono: Globe },
+  { id: "avanzado", nombre: "Avanzado", Icono: Settings2 },
 ];
 
 export function VistaConfiguracion(p: { bd: Bd; refrescar: () => Promise<void>; bloque: string | null }): JSX.Element {
@@ -38,11 +45,12 @@ export function VistaConfiguracion(p: { bd: Bd; refrescar: () => Promise<void>; 
   const { datos, error, recargar } = useConfiguracion(bd.configuracion?.firma);
   const [plantillas, setPlantillas] = useState<EstadoPlantilla[] | null>(null);
   const [informacionNueva, setInformacionNueva] = useState<{ texto: string; vez: number } | null>(null);
-  const [tab, setTab] = useState<TabAjustes>((bloque as TabAjustes) || "negocio");
+  const [filtro, setFiltro] = useState<TabFiltro>((bloque as TabFiltro) || "todas");
 
   const releerPlantillas = useCallback(async () => {
     setPlantillas(await leerPlantillas());
   }, []);
+
   useEffect(() => {
     void releerPlantillas();
   }, [releerPlantillas]);
@@ -57,22 +65,22 @@ export function VistaConfiguracion(p: { bd: Bd; refrescar: () => Promise<void>; 
   }, [datos?.avisos]);
 
   useEffect(() => {
-    if (bloque && TABS.some((t) => t.id === bloque)) {
-      setTab(bloque as TabAjustes);
+    if (bloque && ITEMS_NAV.some((t) => t.id === bloque)) {
+      setFiltro(bloque as TabFiltro);
     }
   }, [bloque]);
 
   const irABloque = useCallback((id: IdSeccionConfiguracion) => {
     irA("configuracion", { bloque: id });
-    if (TABS.some((t) => t.id === id)) setTab(id as TabAjustes);
+    if (ITEMS_NAV.some((t) => t.id === id)) setFiltro(id as TabFiltro);
   }, []);
 
   if (!datos) {
     return (
       <div className="w-full">
         {error ? (
-          <div role="alert" className="flex items-center justify-between gap-4 rounded-[14px] border border-linea bg-white px-6 py-5">
-            <p className="text-[14px] leading-5">No se han podido cargar los ajustes.</p>
+          <div role="alert" className="flex items-center justify-between gap-4 rounded-[14px] border border-linea bg-white px-6 py-5 dark:bg-lienzo">
+            <p className="text-[14px] leading-5 text-tinta">No se han podido cargar los ajustes.</p>
             <button type="button" onClick={() => void recargar()} className={BOTON}>
               Reintentar
             </button>
@@ -88,38 +96,44 @@ export function VistaConfiguracion(p: { bd: Bd; refrescar: () => Promise<void>; 
 
   const comun = { datos, recargar, refrescar };
 
-  return (
-    <div className="flex w-full flex-col gap-6 pb-10 md:flex-row md:items-start">
-      {/* Sub-navegación lateral ordenada */}
-      <nav aria-label="Secciones de ajustes" className="flex shrink-0 flex-row gap-1 overflow-x-auto pb-2 md:w-56 md:flex-col md:pb-0">
-        {TABS.map(({ id, nombre, Icono }) => {
-          const activa = tab === id;
-          return (
-            <button
-              key={id}
-              type="button"
-              onClick={() => setTab(id)}
-              className={`flex shrink-0 cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[13px] transition-colors ${
-                activa ? "bg-principal/10 font-semibold text-principal" : "text-secundario hover:bg-fondo-suave hover:text-texto"
-              }`}
-            >
-              <Icono className="size-4 shrink-0" />
-              <span>{nombre}</span>
-            </button>
-          );
-        })}
-      </nav>
+  const mostrar = (id: TabFiltro) => filtro === "todas" || filtro === id;
 
-      {/* Contenido de la sección seleccionada */}
-      <div className="min-w-0 flex-1 space-y-5">
-        {tab === "negocio" && (
-          <Bloque id="ajustes-negocio" titulo="Configuración del Negocio">
+  return (
+    <div className="w-full pb-12">
+      {/* Barra horizontal de navegación rápida, sin deformar el ancho de las tarjetas */}
+      <div className="sticky top-0 z-20 -mx-1 mb-6 bg-lienzo/90 px-1 py-2 backdrop-blur-md">
+        <nav aria-label="Secciones de ajustes" className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          {ITEMS_NAV.map(({ id, nombre, Icono }) => {
+            const activa = filtro === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setFiltro(id)}
+                className={`flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-[12.5px] font-medium transition-all duration-150 ${
+                  activa
+                    ? "bg-tinta text-white shadow-xs dark:bg-white dark:text-black"
+                    : "border border-linea bg-white text-secundario hover:bg-black/[0.02] hover:text-tinta dark:bg-lienzo dark:hover:bg-white/[0.03]"
+                }`}
+              >
+                <Icono className="size-3.5 shrink-0" strokeWidth={1.75} />
+                <span>{nombre}</span>
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* Contenedor vertical con ancho completo y espaciado consistente */}
+      <div className="flex flex-col gap-6">
+        {mostrar("negocio") && (
+          <Bloque id="ajustes-negocio" titulo="Tu Negocio">
             <BloqueNegocio {...comun} plantillas={plantillas} />
           </Bloque>
         )}
 
-        {tab === "asistente" && (
-          <Bloque id="ajustes-asistente" titulo="Tu Asistente y Modelos">
+        {mostrar("asistente") && (
+          <Bloque id="ajustes-asistente" titulo="Tu Asistente y Modelos de IA">
             <BloqueAsistente
               {...comun}
               bd={bd}
@@ -130,13 +144,13 @@ export function VistaConfiguracion(p: { bd: Bd; refrescar: () => Promise<void>; 
           </Bloque>
         )}
 
-        {tab === "agenda" && (
-          <Bloque id="ajustes-agenda" titulo="Agenda y Horarios de Atención">
+        {mostrar("agenda") && (
+          <Bloque id="ajustes-agenda" titulo="Horario de Citas y Agenda">
             <BloqueAgenda {...comun} bd={bd} />
           </Bloque>
         )}
 
-        {tab === "whatsapp" && (
+        {mostrar("whatsapp") && (
           <Bloque id="ajustes-whatsapp" titulo="WhatsApp y Conexiones">
             <div className="pt-3 pb-4">
               <Conexiones />
@@ -144,27 +158,30 @@ export function VistaConfiguracion(p: { bd: Bd; refrescar: () => Promise<void>; 
           </Bloque>
         )}
 
-        {tab === "equipo" && (
+        {mostrar("equipo") && (
           <Bloque id="ajustes-equipo" titulo="Equipo y Usuarios">
             <BloqueEquipo />
           </Bloque>
         )}
 
-        {tab === "mcp" && (
-          <Bloque id="ajustes-mcp" titulo="Servidor MCP (Conexión Externa)">
+        {mostrar("mcp") && (
+          <Bloque id="ajustes-mcp" titulo="Servidor MCP">
             <BloqueMcp />
           </Bloque>
         )}
 
-        {tab === "web" && (
-          <Bloque id="ajustes-web" titulo="Web Pública de Captación">
+        {mostrar("web") && (
+          <Bloque id="ajustes-web" titulo="Tu Web Pública">
             <BloqueWeb {...comun} />
           </Bloque>
         )}
 
-        {tab === "avanzado" && (
-          <div className="space-y-5">
-            <Pie {...comun} />
+        {mostrar("avanzado") && (
+          <div className="space-y-6">
+            <Bloque id="ajustes-datos" titulo="Datos y Ejemplos">
+              <Pie {...comun} />
+            </Bloque>
+
             <Avanzado
               {...comun}
               irABloque={irABloque}

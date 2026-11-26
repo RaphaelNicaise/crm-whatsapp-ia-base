@@ -14,6 +14,7 @@ import { useModoPrueba } from "../modo-prueba";
 import { useEstado } from "../sistema";
 import { guardarInformacion } from "./api";
 import { guardarCampo } from "./guardar";
+import { IconoModelo } from "./iconos-modelos";
 import {
   AREA,
   Ayuda,
@@ -118,24 +119,59 @@ function SelectorModeloYConsumo({ bd, datos, refrescar }: PropsBloque & { bd: Bd
     <Fila
       etiqueta="Modelo de IA y Consumo"
       idEtiqueta={idEtiqueta}
-      ayuda="Elige el proveedor (OpenAI, Gemini o Claude) y revisa el gasto acumulado del mes."
+      ayuda="Elige el modelo que contesta a tus clientes. Cada uno tiene sus características y precios."
       idAyuda={idAyuda}
       g={g}
     >
       <div className="space-y-3.5">
-        <select
-          id={idEtiqueta}
-          value={modelo}
-          disabled={g.estado === "guardando"}
-          onChange={(e) => void elegirModelo(e.target.value as IdModelo)}
-          className={`${SELECT} w-full`}
-        >
-          {MODELOS.map((id) => (
-            <option key={id} value={id}>
-              {NOMBRES_MODELO[id]}
-            </option>
-          ))}
-        </select>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {MODELOS.map((id) => {
+            const activo = modelo === id;
+            const precio = PRECIOS[id];
+            return (
+              <button
+                key={id}
+                type="button"
+                disabled={g.estado === "guardando"}
+                onClick={() => void elegirModelo(id)}
+                className={`flex cursor-pointer items-start gap-3 rounded-[10px] border p-3 text-left transition-all ${
+                  activo
+                    ? "border-marca bg-marca/5 ring-1 ring-marca shadow-xs dark:bg-marca/10"
+                    : "border-linea bg-white hover:border-linea/80 hover:bg-black/[0.015] dark:bg-lienzo dark:hover:bg-white/[0.02]"
+                }`}
+              >
+                <div className="mt-0.5 shrink-0">
+                  <IconoModelo modelo={id} className="size-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="text-[13px] font-medium leading-4 text-tinta">
+                      {id === "gpt-4o-mini"
+                        ? "GPT-4o Mini"
+                        : id === "gemini-2.0-flash"
+                          ? "Gemini 2.0 Flash"
+                          : id === "claude-haiku-5-5"
+                            ? "Claude Haiku 3.5"
+                            : "Claude Sonnet 3.5"}
+                    </span>
+                    <span className="text-[11px] font-mono text-secundario">
+                      ${precio.entrada.toFixed(2)}/1M
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-[11px] leading-3.5 text-secundario">
+                    {id.startsWith("gpt")
+                      ? "OpenAI · Equilibrado"
+                      : id.startsWith("gemini")
+                        ? "Google · Ultrarrápido"
+                        : id.includes("haiku")
+                          ? "Anthropic · Preciso con reglas"
+                          : "Anthropic · Máxima calidad"}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
 
         <div className="rounded-[10px] border border-linea bg-lienzo p-3.5">
           {modelo.startsWith("gpt") && <CampoClave nombre="OPENAI_API_KEY" etiqueta="Token de API (OpenAI)" />}
@@ -145,7 +181,7 @@ function SelectorModeloYConsumo({ bd, datos, refrescar }: PropsBloque & { bd: Bd
 
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-[10px] border border-linea bg-lienzo px-3.5 py-2.5 text-[12px] text-secundario">
           <span>
-            Costo ref: <strong>${p.entrada.toFixed(2)}</strong> entrada / <strong>${p.salida.toFixed(2)}</strong> salida (por 1M tokens)
+            Modelo activo: <strong>{NOMBRES_MODELO[modelo]}</strong>
           </span>
           {consumo && (
             <span>

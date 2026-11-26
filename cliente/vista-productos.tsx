@@ -387,7 +387,7 @@ export function VistaProductos(): JSX.Element {
                   <tr
                     key={p.id}
                     onClick={() => abrirEdicion(p)}
-                    className="cursor-pointer transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800/80"
+                    className="cursor-pointer transition-colors duration-150 hover:bg-black/[0.02] dark:hover:bg-white/[0.03]"
                   >
                     <td className="px-4 py-3">
                       <div className="font-medium text-texto">{p.nombre}</div>

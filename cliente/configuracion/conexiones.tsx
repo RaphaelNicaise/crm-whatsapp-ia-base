@@ -499,9 +499,11 @@ export function Conexiones(): JSX.Element {
 }
 
 function ListaFilas(p: { estado: EstadoConexiones; comprobar: (forzar?: boolean) => Promise<void>; prueba: boolean }): JSX.Element {
+  // Claude/IA se configura en la sección "Tu Asistente", no en conexiones de WhatsApp.
+  const filas = p.estado.filas.filter((f) => f.id !== "claude");
   return (
     <ul className="flex flex-col divide-y divide-linea">
-      {p.estado.filas.map((fila) => (
+      {filas.map((fila) => (
         <Fila key={fila.id} fila={fila} comprobar={p.comprobar} prueba={p.prueba} />
       ))}
     </ul>
