@@ -241,10 +241,10 @@ export const productos = pgTable("productos", {
  */
 export const ventas = pgTable("ventas", {
   id: text("id").primaryKey(),
-  leadId: text("lead_id")
-    .notNull()
-    .references(() => leads.id, { onDelete: "cascade" }),
+  leadId: text("lead_id").references(() => leads.id, { onDelete: "set null" }),
+  clienteNombre: text("cliente_nombre").notNull().default("Cliente directo"),
   estado: text("estado").notNull().default("borrador"), // 'borrador' | 'pendiente_pago' | 'pagada' | 'cancelada'
+  metodoPago: text("metodo_pago").notNull().default("efectivo"), // 'efectivo' | 'transferencia' | 'tarjeta' | 'mercadopago' | 'otro'
   total: integer("total").notNull().default(0),
   notas: text("notas"),
   enlacePago: text("enlace_pago"),

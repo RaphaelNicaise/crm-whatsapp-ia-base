@@ -18,6 +18,8 @@ import { Avatar } from "./piezas";
 export interface SeccionPaleta {
   id: Vista;
   nombre: string;
+  bloque?: string;
+  palabras?: string;
 }
 
 const RECIENTES = 6;
@@ -74,11 +76,13 @@ function Contenido({ inicial, cerrar, leads, secciones }: Props) {
   const clientes = q
     ? buscar(leads, texto, { campos: cfg.campos, max: MAXIMO })
     : [...leads].sort((a, b) => b.actualizadoEn - a.actualizadoEn).slice(0, RECIENTES);
-  const deSecciones = q ? secciones.filter((s) => normalizar(s.nombre).includes(q)) : [];
+  const deSecciones = q
+    ? secciones.filter((s) => normalizar(s.nombre).includes(q) || (s.palabras ? normalizar(s.palabras).includes(q) : false))
+    : [];
   const resultados: Resultado[] = [
-    ...clientes.map((lead): Resultado => ({ tipo: "lead", lead })),
-    ...(q && clientes.length === 0 ? [{ tipo: "alta", texto } as const] : []),
     ...deSecciones.map((seccion): Resultado => ({ tipo: "seccion", seccion })),
+    ...clientes.map((lead): Resultado => ({ tipo: "lead", lead })),
+    ...(q && clientes.length === 0 && deSecciones.length === 0 ? [{ tipo: "alta", texto } as const] : []),
   ];
   const seleccionado = Math.min(activo, Math.max(resultados.length - 1, 0));
 
@@ -86,7 +90,7 @@ function Contenido({ inicial, cerrar, leads, secciones }: Props) {
     eligio.current = true;
     cerrar();
     if (r.tipo === "lead") abrirCliente(r.lead.id);
-    else if (r.tipo === "seccion") irA(r.seccion.id);
+    else if (r.tipo === "seccion") irA(r.seccion.id, r.seccion.bloque ? { bloque: r.seccion.bloque } : undefined);
     else if (!LETRA.test(r.texto) && r.texto.replace(/\D/g, "").length >= 3) abrirAltaCliente({ telefono: r.texto });
     else abrirAltaCliente({ nombre: r.texto });
   };

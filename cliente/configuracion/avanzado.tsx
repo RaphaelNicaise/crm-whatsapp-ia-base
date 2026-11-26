@@ -5,9 +5,8 @@ import { useEffect, useId, useRef, useState, type JSX, type ReactNode } from "re
 import { lugarDeZona, ZONAS_HORARIAS } from "@/lib/agenda";
 import { conListaPaseSiempre, diasASemanas, informacionDe, listaPaseSiempre, semanasADias } from "@/lib/ajustes";
 import type { EstadoPlantilla } from "@/lib/api-tipos";
-import { LIMITES, MODELOS, NOMBRES_MODELO, revisarInstrucciones, type FrasesFijas, type IdModelo, type RevisionPrompt } from "@/lib/configuracion";
-import { comprobarModelo, leerPlantillas } from "../api-sistema";
-import { CampoClave } from "../campo-clave";
+import { LIMITES, revisarInstrucciones, type FrasesFijas, type RevisionPrompt } from "@/lib/configuracion";
+import { leerPlantillas } from "../api-sistema";
 import { confirmar } from "../confirmaciones";
 import { borrarTodo } from "../datos";
 import { Acceso } from "./acceso";
@@ -68,10 +67,6 @@ export function Avanzado(p: PropsBloque & { alGuardarInstrucciones: (texto: stri
         <Seccion titulo="Frases fijas">
           <Frases {...p} />
         </Seccion>
-        <Modelo {...p} />
-        <div className="py-4">
-          <CampoClave nombre="GEMINI_API_KEY" etiqueta="Notas de voz" />
-        </div>
         <Seccion titulo="Agenda">
           <AgendaFina {...p} />
         </Seccion>
@@ -431,44 +426,6 @@ function Frase({ datos, recargar, clave, etiqueta, ayuda }: PropsBloque & { clav
         }}
       />
     </Sub>
-  );
-}
-
-// ─── Modelo ───────────────────────────────────────────────────────────────────────────────────────
-
-function Modelo({ datos, recargar }: PropsBloque): JSX.Element {
-  const idEtiqueta = useId();
-  const g = useGuardado();
-  const guardado: IdModelo = datos.activa.sistema.asistente.modelo ?? "claude-haiku-5-5";
-  const [modelo, setModelo] = useState<IdModelo>(guardado);
-  const enCurso = useRef(false);
-  useEffect(() => {
-    if (!enCurso.current) setModelo(guardado);
-  }, [guardado]);
-
-  return (
-    <Fila etiqueta="Modelo" idEtiqueta={idEtiqueta} g={g} en="linea">
-      <Segmentado
-        opciones={MODELOS.map((m) => ({ valor: m, texto: NOMBRES_MODELO[m], detalle: m }))}
-        valor={modelo}
-        idEtiqueta={idEtiqueta}
-        describe={g.error ? g.idError : undefined}
-        desactivado={g.estado === "guardando"}
-        cambiar={async (m) => {
-          const antes = modelo;
-          setModelo(m);
-          enCurso.current = true;
-          const bien = await g.ejecutar(async () => {
-            const error = await comprobarModelo(m);
-            if (error !== null) return { ok: false, error };
-            return guardarCampo("sistema.asistente.modelo", m);
-          });
-          enCurso.current = false;
-          if (!bien) setModelo(antes);
-          else void recargar();
-        }}
-      />
-    </Fila>
   );
 }
 

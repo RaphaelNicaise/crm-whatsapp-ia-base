@@ -1,8 +1,9 @@
 "use client";
 
+import { Bot, Building2, CalendarDays, Globe, KeyRound, Plug, Settings2, Users, type LucideIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type JSX } from "react";
 import type { EstadoPlantilla } from "@/lib/api-tipos";
-import { SECCIONES_CONFIGURACION, type IdSeccionConfiguracion } from "@/lib/configuracion";
+import type { IdSeccionConfiguracion } from "@/lib/configuracion";
 import type { Bd } from "@/lib/tipos";
 import { leerPlantillas } from "./api-sistema";
 import { confirmar } from "./confirmaciones";
@@ -11,29 +12,34 @@ import { useConfiguracion } from "./configuracion/api";
 import { BloqueAsistente } from "./configuracion/asistente";
 import { Avanzado } from "./configuracion/avanzado";
 import { Conexiones } from "./configuracion/conexiones";
-import { Bloque, BOTON, menosMovimiento } from "./configuracion/controles";
+import { Bloque, BOTON } from "./configuracion/controles";
 import { BloqueEquipo } from "./configuracion/equipo";
 import { BloqueMcp } from "./configuracion/mcp";
 import { BloqueNegocio } from "./configuracion/negocio";
-import { BloqueWeb } from "./configuracion/web";
 import { Pie } from "./configuracion/pie";
+import { BloqueWeb } from "./configuracion/web";
 import { irA } from "./navegacion";
 
-// Ajustes: una página con cinco bloques («Tu negocio», «Tu web», «Tu asistente», «Horario de citas» y
-// «Conexiones»), el pie con los clientes de ejemplo y el CSV, y «Avanzado», cerrado. Cada control se
-// guarda al cambiarlo y dice «Guardado» a su lado. Lo que no está aquí se adapta con Claude Code.
+type TabAjustes = "negocio" | "asistente" | "agenda" | "whatsapp" | "equipo" | "mcp" | "web" | "avanzado";
 
-const SECCION = Object.fromEntries(SECCIONES_CONFIGURACION.map((s) => [s.id, s])) as Record<IdSeccionConfiguracion, (typeof SECCIONES_CONFIGURACION)[number]>;
+const TABS: { id: TabAjustes; nombre: string; Icono: LucideIcon }[] = [
+  { id: "negocio", nombre: "Negocio", Icono: Building2 },
+  { id: "asistente", nombre: "Tu Asistente y Modelos", Icono: Bot },
+  { id: "agenda", nombre: "Agenda y Horarios", Icono: CalendarDays },
+  { id: "whatsapp", nombre: "WhatsApp / Conexiones", Icono: KeyRound },
+  { id: "equipo", nombre: "Equipo y Usuarios", Icono: Users },
+  { id: "mcp", nombre: "Servidor MCP", Icono: Plug },
+  { id: "web", nombre: "Web Pública", Icono: Globe },
+  { id: "avanzado", nombre: "Avanzado y Datos", Icono: Settings2 },
+];
 
-export function VistaConfiguracion(p: { bd: Bd; refrescar: () => Promise<void>; bloque: IdSeccionConfiguracion | null }): JSX.Element {
+export function VistaConfiguracion(p: { bd: Bd; refrescar: () => Promise<void>; bloque: string | null }): JSX.Element {
   const { bd, refrescar, bloque } = p;
   const { datos, error, recargar } = useConfiguracion(bd.configuracion?.firma);
   const [plantillas, setPlantillas] = useState<EstadoPlantilla[] | null>(null);
   const [informacionNueva, setInformacionNueva] = useState<{ texto: string; vez: number } | null>(null);
-  const titulos = useRef<Partial<Record<IdSeccionConfiguracion, HTMLHeadingElement | null>>>({});
-  const cargado = datos !== null;
+  const [tab, setTab] = useState<TabAjustes>((bloque as TabAjustes) || "negocio");
 
-  // Los estados de los mensajes aprobados: una vez al montar (y otra tras el aviso de prueba).
   const releerPlantillas = useCallback(async () => {
     setPlantillas(await leerPlantillas());
   }, []);
@@ -41,7 +47,6 @@ export function VistaConfiguracion(p: { bd: Bd; refrescar: () => Promise<void>; 
     void releerPlantillas();
   }, [releerPlantillas]);
 
-  // Los avisos del servidor, una vez cada uno.
   const vistos = useRef(new Set<string>());
   useEffect(() => {
     for (const aviso of datos?.avisos ?? []) {
@@ -51,23 +56,16 @@ export function VistaConfiguracion(p: { bd: Bd; refrescar: () => Promise<void>; 
     }
   }, [datos?.avisos]);
 
-  // Al pedir un bloque (#ajustes-horario…), se lleva a la vista y su título se lleva el foco.
-  const llevarA = useCallback((id: IdSeccionConfiguracion) => {
-    const seccion = document.getElementById(SECCION[id].ancla);
-    seccion?.scrollIntoView({ block: "start", behavior: menosMovimiento() ? "auto" : "smooth" });
-    titulos.current[id]?.focus({ preventScroll: true });
-  }, []);
   useEffect(() => {
-    if (bloque && cargado) llevarA(bloque);
-  }, [bloque, cargado, llevarA]);
+    if (bloque && TABS.some((t) => t.id === bloque)) {
+      setTab(bloque as TabAjustes);
+    }
+  }, [bloque]);
 
-  const irABloque = useCallback(
-    (id: IdSeccionConfiguracion) => {
-      irA("configuracion", { bloque: id });
-      llevarA(id);
-    },
-    [llevarA],
-  );
+  const irABloque = useCallback((id: IdSeccionConfiguracion) => {
+    irA("configuracion", { bloque: id });
+    if (TABS.some((t) => t.id === id)) setTab(id as TabAjustes);
+  }, []);
 
   if (!datos) {
     return (
@@ -89,41 +87,92 @@ export function VistaConfiguracion(p: { bd: Bd; refrescar: () => Promise<void>; 
   }
 
   const comun = { datos, recargar, refrescar };
-  const refTitulo = (id: IdSeccionConfiguracion) => (el: HTMLHeadingElement | null) => {
-    titulos.current[id] = el;
-  };
 
   return (
-    <div className="flex w-full flex-col gap-5 pb-10">
-      <Bloque id={SECCION.negocio.ancla} titulo={SECCION.negocio.nombre} tituloRef={refTitulo("negocio")}>
-        <BloqueNegocio {...comun} plantillas={plantillas} />
-      </Bloque>
-      <Bloque id={SECCION.web.ancla} titulo={SECCION.web.nombre} tituloRef={refTitulo("web")}>
-        <BloqueWeb {...comun} />
-      </Bloque>
-      <Bloque id={SECCION.asistente.ancla} titulo={SECCION.asistente.nombre} tituloRef={refTitulo("asistente")}>
-        <BloqueAsistente {...comun} bd={bd} plantillas={plantillas} releerPlantillas={releerPlantillas} informacionNueva={informacionNueva} />
-      </Bloque>
-      <Bloque id={SECCION.agenda.ancla} titulo={SECCION.agenda.nombre} tituloRef={refTitulo("agenda")}>
-        <BloqueAgenda {...comun} bd={bd} />
-      </Bloque>
-      <Bloque id={SECCION.whatsapp.ancla} titulo={SECCION.whatsapp.nombre} tituloRef={refTitulo("whatsapp")}>
-        <div className="pt-3 pb-4">
-          <Conexiones />
-        </div>
-      </Bloque>
-      <Bloque id="ajustes-equipo" titulo="Equipo y Usuarios">
-        <BloqueEquipo />
-      </Bloque>
-      <Bloque id="ajustes-mcp" titulo="Servidor MCP (Conexión Externa)">
-        <BloqueMcp />
-      </Bloque>
-      <Pie {...comun} />
-      <Avanzado
-        {...comun}
-        irABloque={irABloque}
-        alGuardarInstrucciones={(texto) => setInformacionNueva((antes) => ({ texto, vez: (antes?.vez ?? 0) + 1 }))}
-      />
+    <div className="flex w-full flex-col gap-6 pb-10 md:flex-row md:items-start">
+      {/* Sub-navegación lateral ordenada */}
+      <nav aria-label="Secciones de ajustes" className="flex shrink-0 flex-row gap-1 overflow-x-auto pb-2 md:w-56 md:flex-col md:pb-0">
+        {TABS.map(({ id, nombre, Icono }) => {
+          const activa = tab === id;
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setTab(id)}
+              className={`flex shrink-0 cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[13px] transition-colors ${
+                activa ? "bg-principal/10 font-semibold text-principal" : "text-secundario hover:bg-fondo-suave hover:text-texto"
+              }`}
+            >
+              <Icono className="size-4 shrink-0" />
+              <span>{nombre}</span>
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* Contenido de la sección seleccionada */}
+      <div className="min-w-0 flex-1 space-y-5">
+        {tab === "negocio" && (
+          <Bloque id="ajustes-negocio" titulo="Configuración del Negocio">
+            <BloqueNegocio {...comun} plantillas={plantillas} />
+          </Bloque>
+        )}
+
+        {tab === "asistente" && (
+          <Bloque id="ajustes-asistente" titulo="Tu Asistente y Modelos">
+            <BloqueAsistente
+              {...comun}
+              bd={bd}
+              plantillas={plantillas}
+              releerPlantillas={releerPlantillas}
+              informacionNueva={informacionNueva}
+            />
+          </Bloque>
+        )}
+
+        {tab === "agenda" && (
+          <Bloque id="ajustes-agenda" titulo="Agenda y Horarios de Atención">
+            <BloqueAgenda {...comun} bd={bd} />
+          </Bloque>
+        )}
+
+        {tab === "whatsapp" && (
+          <Bloque id="ajustes-whatsapp" titulo="WhatsApp y Conexiones">
+            <div className="pt-3 pb-4">
+              <Conexiones />
+            </div>
+          </Bloque>
+        )}
+
+        {tab === "equipo" && (
+          <Bloque id="ajustes-equipo" titulo="Equipo y Usuarios">
+            <BloqueEquipo />
+          </Bloque>
+        )}
+
+        {tab === "mcp" && (
+          <Bloque id="ajustes-mcp" titulo="Servidor MCP (Conexión Externa)">
+            <BloqueMcp />
+          </Bloque>
+        )}
+
+        {tab === "web" && (
+          <Bloque id="ajustes-web" titulo="Web Pública de Captación">
+            <BloqueWeb {...comun} />
+          </Bloque>
+        )}
+
+        {tab === "avanzado" && (
+          <div className="space-y-5">
+            <Pie {...comun} />
+            <Avanzado
+              {...comun}
+              irABloque={irABloque}
+              alGuardarInstrucciones={(texto) => setInformacionNueva((antes) => ({ texto, vez: (antes?.vez ?? 0) + 1 }))}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -166,6 +166,39 @@ const ESQUEMA = [
     costo_usd text NOT NULL,
     creado_en bigint NOT NULL
   )`,
+  `CREATE TABLE IF NOT EXISTS productos (
+    id text PRIMARY KEY,
+    nombre text NOT NULL,
+    sku text,
+    descripcion text,
+    categoria text,
+    precio integer NOT NULL,
+    stock integer NOT NULL DEFAULT 0,
+    activo boolean NOT NULL DEFAULT true,
+    creado_en bigint NOT NULL,
+    actualizado_en bigint NOT NULL
+  )`,
+  `CREATE TABLE IF NOT EXISTS ventas (
+    id text PRIMARY KEY,
+    lead_id text REFERENCES leads(id) ON DELETE SET NULL,
+    cliente_nombre text NOT NULL DEFAULT 'Cliente directo',
+    estado text NOT NULL DEFAULT 'borrador',
+    metodo_pago text NOT NULL DEFAULT 'efectivo',
+    total integer NOT NULL DEFAULT 0,
+    notas text,
+    enlace_pago text,
+    comprobante_url text,
+    creado_en bigint NOT NULL,
+    pagado_en bigint
+  )`,
+  `CREATE TABLE IF NOT EXISTS lineas_venta (
+    id text PRIMARY KEY,
+    venta_id text NOT NULL REFERENCES ventas(id) ON DELETE CASCADE,
+    producto_id text NOT NULL REFERENCES productos(id) ON DELETE RESTRICT,
+    cantidad integer NOT NULL DEFAULT 1,
+    precio_unitario integer NOT NULL,
+    subtotal integer NOT NULL
+  )`,
   // Con RLS y sin políticas, la API pública de Supabase no puede leer ni escribir nada: hay
   // teléfonos y conversaciones reales. Solo entra el servidor, con la cadena de conexión.
   ...["leads", "mensajes", "visitas", "notas", "tareas", "actividad", "proyectos", "mensajes_procesados", "ajustes"].map(

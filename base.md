@@ -19,9 +19,19 @@
 
 ### 2. Catálogo de Productos y Control de Stock
 - **Tabla `productos` (`lib/db/schema.ts`):** id, nombre, sku, descripcion, categoria, precio, stock, activo.
-- **Repositorio:** `lib/db/repositorios/productos.ts` con soporte para listado, búsqueda por texto, creación y actualización de stock.
+- **Repositorio:** `lib/db/repositorios/productos.ts` y `lib/db/repositorios/productos.repo.ts` con soporte para listado, búsqueda por texto, creación, actualización y control de stock.
 - **Tool de Asistente IA (`consultar_catalogo`):** Permite a la IA responder consultas de precios y existencias en WhatsApp directamente desde la base de datos sin alucinar.
-- **API REST:** `GET /api/productos`, `POST /api/productos`.
+- **API REST:** `GET`, `POST`, `PATCH`, `DELETE` en `/api/productos`.
+- **UI Catálogo (`cliente/vista-productos.tsx`):**
+  - Listado de productos con KPIs en tiempo real (total, activos, sin stock).
+  - Hover gris en registros y clic en la fila completa para abrir el editor.
+  - Botón de edición dedicado (`Pencil`) con formulario/modal para editar nombre, SKU, categoría, precio, stock, descripción y estado activo.
+  - Borrado y cambio rápido de estado activo/inactivo.
+
+### 3. Modo Oscuro Global (Dark Mode)
+- **Componente:** `cliente/interruptor-tema.tsx` (icono de Sol y Luna con persistencia en `localStorage`).
+- **Ubicación:** Arriba a la izquierda en la barra lateral de escritorio y en la cabecera móvil.
+- **Estilos globales:** `app/globals.css` adaptado con variables CSS completas (`html.dark`) y script anti-parpadeo en `app/layout.tsx`.
 
 ### 3. Cotizaciones y Gestión de Ventas
 - **Tablas `ventas` y `lineas_venta`:** Asocia presupuestos a leads con estados (`borrador`, `pendiente_pago`, `pagada`, `cancelada`), cálculo automático de totales y líneas de detalle.

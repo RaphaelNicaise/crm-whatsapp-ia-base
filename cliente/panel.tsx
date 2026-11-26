@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, ExternalLink, Menu, Search, SlidersHorizontal, Sun, Users, Volume2, VolumeX, X } from "lucide-react";
+import { CalendarDays, ExternalLink, Menu, Package, Receipt, Search, SlidersHorizontal, Sun, Users, Volume2, VolumeX, X } from "lucide-react";
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent as EventoTeclado } from "react";
 import { citasDeHoy, teToca, type FilaTeToca } from "@/lib/inicio";
 import { esEjemplo } from "@/lib/negocio";
@@ -16,6 +16,7 @@ import { borrarEjemplos, desfaseServidor, useBd } from "./datos";
 import { EnDirecto } from "./en-directo";
 import { useLlegadas } from "./llegada";
 import { LineaEstado, useTonoLinea } from "./linea-estado";
+import { InterruptorTema } from "./interruptor-tema";
 import { abrirCliente, cerrarCliente, irA, useUbicacion, type Vista } from "./navegacion";
 import { ProveedorNegocio, useNegocio } from "./negocio";
 import { Paleta, type SeccionPaleta } from "./paleta";
@@ -26,6 +27,8 @@ import { VistaAgenda } from "./vista-agenda";
 import { VistaConfiguracion } from "./vista-configuracion";
 import { VistaHoy } from "./vista-hoy";
 import { VistaLeads } from "./vista-leads";
+import { VistaProductos } from "./vista-productos";
+import { VistaVentas } from "./vista-ventas";
 
 // El marco del panel: la barra lateral con las cuatro secciones (una por pregunta del dueño: ¿qué me
 // toca hoy?, ¿dónde está este cliente?, ¿qué citas tengo?, ¿cómo cambio algo?), la URL, el título de
@@ -247,6 +250,8 @@ function MarcoPanel({ bd, conectado, refrescar }: { bd: Bd; conectado: boolean; 
   const secciones: (SeccionPaleta & { Icono: typeof Users })[] = [
     { id: "hoy", nombre: "Hoy", Icono: Sun },
     { id: "clientes", nombre: frases.seccionClientes, Icono: Users },
+    { id: "productos", nombre: "Productos", Icono: Package },
+    { id: "ventas", nombre: "Ventas", Icono: Receipt },
     { id: "agenda", nombre: "Agenda", Icono: CalendarDays },
     { id: "configuracion", nombre: "Ajustes", Icono: SlidersHorizontal },
   ];
@@ -365,29 +370,32 @@ function MarcoPanel({ bd, conectado, refrescar }: { bd: Bd; conectado: boolean; 
   return (
     <div className="min-h-screen bg-lienzo lg:grid lg:grid-cols-[240px_minmax(0,1fr)]">
       <aside className="sticky top-0 hidden h-screen flex-col self-start bg-[#151515] px-3 pt-4 pb-3 text-white lg:flex">
-        <div className="flex items-start gap-2.5 px-1.5">
-          {logo ? (
-            <span className="flex h-10 max-w-[88px] shrink-0 items-center justify-center rounded-[8px] bg-white px-1.5">
-              <img src={logo} alt="" className="max-h-8 w-auto object-contain" />
+        <div className="flex items-start justify-between gap-2 px-1.5">
+          <div className="flex items-start gap-2.5 min-w-0">
+            {logo ? (
+              <span className="flex h-10 max-w-[88px] shrink-0 items-center justify-center rounded-[8px] bg-white px-1.5">
+                <img src={logo} alt="" className="max-h-8 w-auto object-contain" />
+              </span>
+            ) : (
+              <span aria-hidden className="flex size-9 shrink-0 items-center justify-center rounded-[8px] bg-marca text-[15px] font-semibold text-marca-texto">
+                {nombre.charAt(0).toUpperCase()}
+              </span>
+            )}
+            <span className="flex min-w-0 flex-col gap-0.5 pt-px">
+              <span className="text-[14px] leading-[18px] font-medium break-words">{nombre}</span>
+              <a
+                href="/"
+                target="_blank"
+                rel="noopener"
+                aria-label="Ver tu web (se abre en otra pestaña)"
+                className="inline-flex w-fit items-center gap-1 rounded-[4px] text-[12px] leading-4 text-white/55 transition-colors duration-150 ease-out hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70"
+              >
+                Ver tu web
+                <ExternalLink aria-hidden className="size-3" strokeWidth={1.75} />
+              </a>
             </span>
-          ) : (
-            <span aria-hidden className="flex size-9 shrink-0 items-center justify-center rounded-[8px] bg-marca text-[15px] font-semibold text-marca-texto">
-              {nombre.charAt(0).toUpperCase()}
-            </span>
-          )}
-          <span className="flex min-w-0 flex-col gap-0.5 pt-px">
-            <span className="text-[14px] leading-[18px] font-medium break-words">{nombre}</span>
-            <a
-              href="/"
-              target="_blank"
-              rel="noopener"
-              aria-label="Ver tu web (se abre en otra pestaña)"
-              className="inline-flex w-fit items-center gap-1 rounded-[4px] text-[12px] leading-4 text-white/55 transition-colors duration-150 ease-out hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70"
-            >
-              Ver tu web
-              <ExternalLink aria-hidden className="size-3" strokeWidth={1.75} />
-            </a>
-          </span>
+          </div>
+          <InterruptorTema />
         </div>
 
         <div className="relative mt-5">
@@ -419,8 +427,8 @@ function MarcoPanel({ bd, conectado, refrescar }: { bd: Bd; conectado: boolean; 
         </div>
 
         <nav aria-label="Secciones del panel" className="mt-4 flex flex-1 flex-col gap-0.5">
-          {itemsOscuros.slice(0, 3)}
-          <div className="mt-auto pt-3">{itemsOscuros[3]}</div>
+          {itemsOscuros.slice(0, -1)}
+          <div className="mt-auto pt-3">{itemsOscuros[itemsOscuros.length - 1]}</div>
         </nav>
 
         <div className="mt-3 flex flex-col gap-1 border-t border-white/10 pt-3">
@@ -446,7 +454,8 @@ function MarcoPanel({ bd, conectado, refrescar }: { bd: Bd; conectado: boolean; 
 
       {/* Por debajo de 1024 px, la barra lateral se queda en esta barra de arriba con un menú. */}
       <div className="sticky top-0 z-30 lg:hidden">
-        <div className="flex h-14 items-center gap-1 bg-[#151515] pr-1.5 pl-4 text-white">
+        <div className="flex h-14 items-center gap-1.5 bg-[#151515] pr-1.5 pl-3 text-white">
+          <InterruptorTema />
           {logo ? (
             <span className="flex h-9 max-w-[72px] shrink-0 items-center justify-center rounded-[8px] bg-white px-1.5">
               <img src={logo} alt="" className="max-h-7 w-auto object-contain" />
@@ -562,6 +571,8 @@ function MarcoPanel({ bd, conectado, refrescar }: { bd: Bd; conectado: boolean; 
             {mostrarPrimero && <PrimerCliente contestar={contestarPrimero} cliente={cfg.vocabulario.cliente} />}
             {lista && vista === "hoy" && <VistaHoy bd={bd} ahora={momento} filas={filas} llegadas={llegadas} refrescar={refrescar} />}
             {vistaDeLeads}
+            {vista === "productos" && <VistaProductos />}
+            {vista === "ventas" && <VistaVentas />}
             {lista && vista === "agenda" && <VistaAgenda bd={bd} ahora={momento} />}
             {vista === "configuracion" && <VistaConfiguracion bd={bd} refrescar={refrescar} bloque={ubicacion.bloque} />}
           </div>
@@ -591,7 +602,30 @@ function MarcoPanel({ bd, conectado, refrescar }: { bd: Bd; conectado: boolean; 
         inicial={paleta?.inicial ?? ""}
         cerrar={() => setPaleta(null)}
         leads={leads}
-        secciones={secciones.map(({ id, nombre: n }) => ({ id, nombre: n }))}
+        secciones={[
+          ...secciones.map(({ id, nombre: n }) => ({
+            id,
+            nombre: n,
+            palabras:
+              id === "configuracion"
+                ? "ajustes configuracion settings"
+                : id === "productos"
+                  ? "productos catalogo stock sku precios servicios"
+                  : id === "ventas"
+                    ? "ventas pedidos ingresos cobros facturacion"
+                    : id === "agenda"
+                      ? "agenda citas turnos calendario"
+                      : undefined,
+          })),
+          { id: "configuracion", nombre: "Ajustes · Negocio", bloque: "negocio", palabras: "nombre logo color pais moneda" },
+          { id: "configuracion", nombre: "Ajustes · Tu Asistente y Modelos IA", bloque: "asistente", palabras: "modelo openai gpt gemini claude tokens consumo prompt" },
+          { id: "configuracion", nombre: "Ajustes · Agenda y Horarios", bloque: "agenda", palabras: "horarios dias atencion franjas" },
+          { id: "configuracion", nombre: "Ajustes · WhatsApp y Conexiones", bloque: "whatsapp", palabras: "meta token webhook plantillas" },
+          { id: "configuracion", nombre: "Ajustes · Equipo y Usuarios", bloque: "equipo", palabras: "usuarios roles operadores admin equipo" },
+          { id: "configuracion", nombre: "Ajustes · Servidor MCP", bloque: "mcp", palabras: "mcp claude cursor protocolo" },
+          { id: "configuracion", nombre: "Ajustes · Web Pública", bloque: "web", palabras: "web portada formulario boton" },
+          { id: "configuracion", nombre: "Ajustes · Avanzado y Datos", bloque: "avanzado", palabras: "avanzado csv exportar instrucciones" },
+        ]}
       />
       <Confirmaciones />
       <PuestaEnMarcha />

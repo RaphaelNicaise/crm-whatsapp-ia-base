@@ -42,7 +42,9 @@ export async function crearVentaMemoria(
   const nuevaVenta: VentaModel = {
     id: ventaId,
     leadId,
+    clienteNombre: "Cliente WhatsApp",
     estado: "pendiente_pago",
+    metodoPago: "transferencia",
     total: totalCalculado,
     notas: notas ?? null,
     enlacePago: null,

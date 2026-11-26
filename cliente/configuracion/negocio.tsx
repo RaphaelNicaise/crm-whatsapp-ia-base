@@ -55,7 +55,6 @@ export interface PropsBloque {
 export function BloqueNegocio(p: PropsBloque & { plantillas: EstadoPlantilla[] | null }): JSX.Element {
   return (
     <>
-      <TipoDeNegocio {...p} />
       <Nombre {...p} />
       <Logo {...p} />
       <Color {...p} />

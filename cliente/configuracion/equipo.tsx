@@ -1,10 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, type JSX } from "react";
-import { BOTON_PRINCIPAL, ErrorCampo } from "./controles";
-
-const INPUT_CLASS =
-  "w-full rounded-lg border border-borde bg-fondo px-3 py-2 text-[13px] text-texto focus:border-principal focus:outline-none";
+import { BOTON_PRINCIPAL, ENTRADA, ErrorCampo, SELECT } from "./controles";
 
 interface UsuarioLista {
   id: string;
@@ -105,7 +102,7 @@ export function BloqueEquipo(): JSX.Element {
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             required
-            className={INPUT_CLASS}
+            className={`${ENTRADA} w-full`}
           />
           <input
             type="email"
@@ -113,7 +110,7 @@ export function BloqueEquipo(): JSX.Element {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className={INPUT_CLASS}
+            className={`${ENTRADA} w-full`}
           />
           <input
             type="password"
@@ -122,9 +119,9 @@ export function BloqueEquipo(): JSX.Element {
             onChange={(e) => setPassword(e.target.value)}
             minLength={8}
             required
-            className={INPUT_CLASS}
+            className={`${ENTRADA} w-full`}
           />
-          <select value={rol} onChange={(e) => setRol(e.target.value as "operador" | "admin")} className={INPUT_CLASS}>
+          <select value={rol} onChange={(e) => setRol(e.target.value as "operador" | "admin")} className={`${SELECT} w-full`}>
             <option value="operador">Operador</option>
             <option value="admin">Administrador</option>
           </select>

@@ -4,7 +4,9 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { obtenerConsumoMesActual } from "../db/repositorios/consumo.repo";
 import { asignarLeadUsuario, listarLeadsDrizzle } from "../db/repositorios/leads.repo";
+import { crearProducto, listarProductos } from "../db/repositorios/productos.repo";
 import { listarUsuarios } from "../db/repositorios/usuarios.repo";
+import { crearVenta, listarVentas } from "../db/repositorios/ventas.repo";
 import { enviarTexto } from "../whatsapp";
 
 /**
@@ -128,6 +130,65 @@ export function crearServidorMcp(): McpServer {
       return {
         content: [{ type: "text", text: `Mensaje enviado. ID Meta (wamid): ${wamid}` }],
       };
+    },
+  );
+
+  server.tool(
+    "listar_productos",
+    "Lista el catálogo de productos y servicios del negocio filtrados opcionalmente.",
+    {
+      buscar: z.string().optional().describe("Texto a buscar en nombre, SKU o descripción"),
+      categoria: z.string().optional().describe("Filtrar por categoría"),
+      soloActivos: z.boolean().optional().describe("Si true, solo muestra productos activos"),
+    },
+    async ({ buscar, categoria, soloActivos }) => {
+      const lista = await listarProductos({ buscar, categoria, soloActivos });
+      return { content: [{ type: "text", text: JSON.stringify(lista, null, 2) }] };
+    },
+  );
+
+  server.tool(
+    "crear_producto",
+    "Crea un nuevo producto o servicio en el catálogo.",
+    {
+      nombre: z.string().min(1),
+      precio: z.number().min(0),
+      categoria: z.string().optional(),
+      stock: z.number().int().min(0).optional(),
+      sku: z.string().optional(),
+      descripcion: z.string().optional(),
+    },
+    async (datos) => {
+      const creado = await crearProducto(datos);
+      return { content: [{ type: "text", text: JSON.stringify(creado, null, 2) }] };
+    },
+  );
+
+  server.tool(
+    "listar_ventas",
+    "Lista las ventas y pedidos registrados en el CRM.",
+    {
+      estado: z.enum(["todos", "borrador", "pendiente_pago", "pagada", "cancelada"]).optional(),
+      buscar: z.string().optional(),
+    },
+    async ({ estado, buscar }) => {
+      const lista = await listarVentas({ estado, buscar });
+      return { content: [{ type: "text", text: JSON.stringify(lista, null, 2) }] };
+    },
+  );
+
+  server.tool(
+    "registrar_venta",
+    "Registra una venta nueva descontando stock automáticamente.",
+    {
+      clienteNombre: z.string().min(1),
+      estado: z.enum(["borrador", "pendiente_pago", "pagada", "cancelada"]).optional(),
+      metodoPago: z.string().optional(),
+      items: z.array(z.object({ productoId: z.string(), cantidad: z.number().int().min(1) })).min(1),
+    },
+    async (datos) => {
+      const creada = await crearVenta(datos);
+      return { content: [{ type: "text", text: JSON.stringify(creada, null, 2) }] };
     },
   );
 

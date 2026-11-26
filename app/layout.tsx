@@ -42,7 +42,14 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     color && COLOR_VALIDO.test(color) ? ({ "--color-marca": color, "--color-marca-texto": colorTexto(color) } as CSSProperties) : undefined;
 
   return (
-    <html lang="es" className={`${interTight.variable} ${dmMono.variable}`} style={estilo}>
+    <html lang="es" suppressHydrationWarning className={`${interTight.variable} ${dmMono.variable}`} style={estilo}>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem('crm-tema');if(t==='oscuro'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}`,
+          }}
+        />
+      </head>
       <body>{children}</body>
     </html>
   );

@@ -7,6 +7,7 @@ import { PRECIOS } from "@/lib/precios";
 import { formatoTelefono } from "@/lib/regional";
 import type { Bd } from "@/lib/tipos";
 import { cambiarAsistente, enviarAvisoPrueba } from "../api-sistema";
+import { CampoClave } from "../campo-clave";
 import { ChatDePrueba } from "../chat-de-prueba";
 import { confirmar } from "../confirmaciones";
 import { useModoPrueba } from "../modo-prueba";
@@ -24,6 +25,7 @@ import {
   Fila,
   Interruptor,
   LineaAtencion,
+  SELECT,
   Segmentado,
   cifra,
   useGuardado,
@@ -120,13 +122,13 @@ function SelectorModeloYConsumo({ bd, datos, refrescar }: PropsBloque & { bd: Bd
       idAyuda={idAyuda}
       g={g}
     >
-      <div className="space-y-3">
+      <div className="space-y-3.5">
         <select
           id={idEtiqueta}
           value={modelo}
           disabled={g.estado === "guardando"}
           onChange={(e) => void elegirModelo(e.target.value as IdModelo)}
-          className="w-full rounded-lg border border-borde bg-fondo px-3 py-2 text-[14px] text-texto focus:border-principal focus:outline-none"
+          className={`${SELECT} w-full`}
         >
           {MODELOS.map((id) => (
             <option key={id} value={id}>
@@ -134,7 +136,14 @@ function SelectorModeloYConsumo({ bd, datos, refrescar }: PropsBloque & { bd: Bd
             </option>
           ))}
         </select>
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-borde bg-fondo-suave px-3 py-2 text-[12px] text-secundario">
+
+        <div className="rounded-[10px] border border-linea bg-lienzo p-3.5">
+          {modelo.startsWith("gpt") && <CampoClave nombre="OPENAI_API_KEY" etiqueta="Token de API (OpenAI)" />}
+          {modelo.startsWith("gemini") && <CampoClave nombre="GEMINI_API_KEY" etiqueta="Token de API (Google Gemini)" />}
+          {modelo.startsWith("claude") && <CampoClave nombre="ANTHROPIC_API_KEY" etiqueta="Token de API (Anthropic Claude)" />}
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-[10px] border border-linea bg-lienzo px-3.5 py-2.5 text-[12px] text-secundario">
           <span>
             Costo ref: <strong>${p.entrada.toFixed(2)}</strong> entrada / <strong>${p.salida.toFixed(2)}</strong> salida (por 1M tokens)
           </span>

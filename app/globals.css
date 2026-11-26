@@ -33,6 +33,85 @@
   --ease-salida: cubic-bezier(0, 0, 0.2, 1);
 }
 
+/* ─── Modo Oscuro Global ─── */
+html.dark {
+  --color-tinta: #f4f4f5;
+  --color-texto: #f4f4f5;
+  --color-secundario: #a1a1aa;
+  --color-fondo: #09090b;
+  --color-lienzo: #121215;
+  --color-linea: #27272a;
+  --color-fondo-suave: #1c1c21;
+}
+
+html.dark body {
+  background-color: var(--color-fondo);
+  color: var(--color-tinta);
+}
+
+html.dark .bg-lienzo {
+  background-color: #121215 !important;
+}
+
+html.dark .bg-white {
+  background-color: #18181b !important;
+}
+
+html.dark .bg-fondo {
+  background-color: #09090b !important;
+}
+
+html.dark .bg-fondo-suave {
+  background-color: #222228 !important;
+}
+
+html.dark .border-linea {
+  border-color: #27272a !important;
+}
+
+html.dark .text-texto,
+html.dark .text-principal,
+html.dark .text-tinta {
+  color: #f4f4f5 !important;
+}
+
+html.dark .text-secundario {
+  color: #a1a1aa !important;
+}
+
+html.dark input:not([type="checkbox"]):not([type="radio"]),
+html.dark select,
+html.dark textarea {
+  background-color: #18181b !important;
+  color: #f4f4f5 !important;
+  border-color: #3f3f46 !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #71717a !important;
+}
+
+html.dark table thead {
+  background-color: #18181b !important;
+  border-color: #27272a !important;
+}
+
+html.dark table thead th {
+  color: #a1a1aa !important;
+}
+
+html.dark table tbody tr:hover,
+html.dark .fila-hover:hover {
+  background-color: #222228 !important;
+}
+
+html.dark .cristal {
+  background: rgba(24, 24, 27, 0.75) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+
 /* Los tres puntos de «escribiendo…» (animate-escribiendo). */
 @keyframes escribiendo {
   0%,
