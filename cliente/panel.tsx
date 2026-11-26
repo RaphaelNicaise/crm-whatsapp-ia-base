@@ -56,7 +56,12 @@ function MarcoPanel({ bd, conectado, refrescar }: { bd: Bd; conectado: boolean; 
   const { cfg, frases, zona } = useNegocio();
   const nombre = cfg.negocio.nombre;
   const ubicacion = useUbicacion();
-  const vista = ubicacion.vista;
+  const [vistaDirecta, setVistaDirecta] = useState<Vista | null>(null);
+  const vista = vistaDirecta ?? ubicacion.vista;
+
+  useEffect(() => {
+    setVistaDirecta(null);
+  }, [ubicacion.vista]);
   const [ahora, setAhora] = useState<Date | null>(null);
   const [paleta, setPaleta] = useState<{ inicial: string } | null>(null);
   const [aviso, setAviso] = useState<AvisoTeToca | null>(null);
@@ -288,6 +293,7 @@ function MarcoPanel({ bd, conectado, refrescar }: { bd: Bd; conectado: boolean; 
           key={id}
           type="button"
           onClick={() => {
+            setVistaDirecta(id);
             irA(id);
             if (enMenu) cerrarMenu();
           }}

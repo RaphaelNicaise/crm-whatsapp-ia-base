@@ -36,7 +36,11 @@
 - **Estilos globales:** `app/globals.css` adaptado con variables CSS completas (`html.dark`), soporte nativo para Tailwind v4 (`@custom-variant dark`) y script anti-parpadeo en `app/layout.tsx`.
 
 ### 4. Navegación en Ajustes y Multi-Modelo con Iconos
-- **Vista Configuración (`cliente/vista-configuracion.tsx`):** Navegación lateral de tabs intacta como en la versión previa, con icono oficial de WhatsApp en la sección de mensajería.
+- **Navegación Reactiva del Sidebar (`cliente/navegacion.ts` y `cliente/panel.tsx`):**
+  - Registro global de oyentes (`__crm_oyentes`) para evitar pérdida de notificaciones por aislamiento de módulos en Next.js/Turbopack.
+  - Estado reactivo local directo (`vistaDirecta`) en `MarcoPanel` para respuesta instantánea de render al hacer clic en cualquier sección (Hoy, Clientes, Productos, Ventas, Agenda, Ajustes).
+  - Emisión de eventos estándar (`popstate`, `hashchange`, `crm-navegacion`) y manipulación correcta de historial.
+- **Vista Configuración (`cliente/vista-configuracion.tsx`):** Sub-navegación lateral de tabs reactiva e integrada con la URL (`irA("configuracion", { bloque: id })`), con estilos consistentes en modo claro y oscuro, e icono oficial de WhatsApp en la sección de mensajería.
 - **Botón Conectar/Configurar (`cliente/configuracion/conexiones.tsx`):** Sustituido "Arreglar" por "Conectar" / "Configurar".
 - **Selector de Modelos (`cliente/configuracion/asistente.tsx`):** Selección visual con íconos oficiales (OpenAI, Google Gemini y la chispa oficial de Anthropic Claude provista en `/iconos/claude.png`).
 - **Buscador Paleta (`cliente/paleta.tsx`):** Placeholder "Buscar cliente o funcionalidad…" y foco automático directo al input del modal al abrir.

@@ -13,7 +13,7 @@ import { haceCuanto } from "./piezas";
 // separados y los mensajes seguidos agrupados. Un hilo corto se queda pegado abajo, junto a la caja.
 
 /** El verde de la burbuja del asistente: el color de la marca en claro, o variable en oscuro. */
-const FONDO_ASISTENTE = "var(--burbuja-agente-bg, color-mix(in oklab, var(--color-marca) 14%, white))";
+const FONDO_ASISTENTE = "var(--burbuja-asistente-bg, color-mix(in oklab, var(--color-marca) 14%, white))";
 
 function Entrega({ m }: { m: Mensaje }) {
   switch (m.entrega) {

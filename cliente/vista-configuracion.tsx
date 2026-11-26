@@ -99,9 +99,12 @@ export function VistaConfiguracion(p: { bd: Bd; refrescar: () => Promise<void>; 
             <button
               key={id}
               type="button"
-              onClick={() => setTab(id)}
-              className={`flex shrink-0 cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[13px] transition-colors ${
-                activa ? "bg-marca/10 font-semibold text-marca dark:bg-marca/20 dark:text-marca" : "text-secundario hover:bg-black/[0.03] dark:hover:bg-white/[0.04] hover:text-tinta"
+              onClick={() => {
+                setTab(id);
+                irA("configuracion", { bloque: id });
+              }}
+              className={`flex shrink-0 cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[13px] font-medium transition-colors ${
+                activa ? "bg-marca/15 font-semibold text-marca dark:bg-marca/25 dark:text-marca" : "text-secundario hover:bg-black/[0.04] dark:hover:bg-white/[0.05] hover:text-tinta dark:hover:text-white"
               }`}
             >
               <Icono className="size-4 shrink-0" />

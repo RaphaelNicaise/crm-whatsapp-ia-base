@@ -67,15 +67,42 @@ export function hrefDe(u: Partial<Ubicacion>): string {
   return `/panel${cliente ? `?cliente=${encodeURIComponent(cliente)}` : ""}${ancla}`;
 }
 
-const oyentes = new Set<() => void>();
+declare global {
+  var __crm_oyentes: Set<() => void> | undefined;
+}
+
+function obtenerOyentes(): Set<() => void> {
+  if (typeof window !== "undefined") {
+    if (!window.__crm_oyentes) {
+      window.__crm_oyentes = new Set();
+    }
+    return window.__crm_oyentes;
+  }
+  return new Set();
+}
 
 function notificar(): void {
-  for (const oyente of oyentes) oyente();
+  for (const oyente of obtenerOyentes()) {
+    try {
+      oyente();
+    } catch {
+      // Ignorar fallos de oyentes
+    }
+  }
 }
 
 function cambiarUrl(u: Partial<Ubicacion>): void {
   if (typeof window === "undefined") return;
-  history.replaceState(history.state, "", hrefDe(u));
+  const nuevoHref = hrefDe(u);
+  guardada = null;
+  try {
+    history.pushState(history.state, "", nuevoHref);
+  } catch {
+    window.location.href = nuevoHref;
+  }
+  window.dispatchEvent(new Event("hashchange"));
+  window.dispatchEvent(new Event("popstate"));
+  window.dispatchEvent(new CustomEvent("crm-navegacion", { detail: u }));
   notificar();
 }
 
@@ -92,13 +119,17 @@ export function cerrarCliente(): void {
 }
 
 function suscribir(avisar: () => void): () => void {
+  if (typeof window === "undefined") return () => {};
+  const oyentes = obtenerOyentes();
   oyentes.add(avisar);
   window.addEventListener("popstate", avisar);
   window.addEventListener("hashchange", avisar);
+  window.addEventListener("crm-navegacion", avisar);
   return () => {
     oyentes.delete(avisar);
     window.removeEventListener("popstate", avisar);
     window.removeEventListener("hashchange", avisar);
+    window.removeEventListener("crm-navegacion", avisar);
   };
 }
 
@@ -106,8 +137,11 @@ function suscribir(avisar: () => void): () => void {
 let guardada: { href: string; ubicacion: Ubicacion } | null = null;
 
 function instantanea(): Ubicacion {
+  if (typeof window === "undefined") return INICIO;
   const href = window.location.href;
-  if (guardada?.href !== href) guardada = { href, ubicacion: leerUbicacion(href) };
+  if (!guardada || guardada.href !== href) {
+    guardada = { href, ubicacion: leerUbicacion(href) };
+  }
   return guardada.ubicacion;
 }
 
