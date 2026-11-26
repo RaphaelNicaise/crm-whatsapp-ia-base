@@ -1,0 +1,62 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: crm-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-crm}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-crm_password_segura}
+      POSTGRES_DB: ${POSTGRES_DB:-crm_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-crm} -d ${POSTGRES_DB:-crm_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - crm-net
+
+  crm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: crm-whatsapp-ia:latest
+    container_name: crm-app
+    restart: unless-stopped
+    ports:
+      - "${PUERTO:-8000}:8000"
+    environment:
+      - NODE_ENV=production
+      - PUERTO=8000
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-crm}:${POSTGRES_PASSWORD:-crm_password_segura}@postgres:5432/${POSTGRES_DB:-crm_db}
+      - CRM_DOMINIO=${CRM_DOMINIO:-}
+      - CRM_URL_PUBLICA=${CRM_URL_PUBLICA:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - WHATSAPP_TOKEN=${WHATSAPP_TOKEN:-}
+      - META_APP_SECRET=${META_APP_SECRET:-}
+      - WEBHOOK_VERIFY_TOKEN=${WEBHOOK_VERIFY_TOKEN:-}
+      - WHATSAPP_PHONE_NUMBER_ID=${WHATSAPP_PHONE_NUMBER_ID:-}
+      - WHATSAPP_BUSINESS_ACCOUNT_ID=${WHATSAPP_BUSINESS_ACCOUNT_ID:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - MCP_TOKEN=${MCP_TOKEN:-}
+    volumes:
+      - ./agente.md:/app/agente.md
+      - ./copias:/app/copias
+      - ./logs:/app/logs
+      - ./.env.local:/app/.env.local
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - crm-net
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  crm-net:
+    driver: bridge

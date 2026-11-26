@@ -12,6 +12,8 @@ import { BloqueAsistente } from "./configuracion/asistente";
 import { Avanzado } from "./configuracion/avanzado";
 import { Conexiones } from "./configuracion/conexiones";
 import { Bloque, BOTON, menosMovimiento } from "./configuracion/controles";
+import { BloqueEquipo } from "./configuracion/equipo";
+import { BloqueMcp } from "./configuracion/mcp";
 import { BloqueNegocio } from "./configuracion/negocio";
 import { BloqueWeb } from "./configuracion/web";
 import { Pie } from "./configuracion/pie";
@@ -109,6 +111,12 @@ export function VistaConfiguracion(p: { bd: Bd; refrescar: () => Promise<void>; 
         <div className="pt-3 pb-4">
           <Conexiones />
         </div>
+      </Bloque>
+      <Bloque id="ajustes-equipo" titulo="Equipo y Usuarios">
+        <BloqueEquipo />
+      </Bloque>
+      <Bloque id="ajustes-mcp" titulo="Servidor MCP (Conexión Externa)">
+        <BloqueMcp />
       </Bloque>
       <Pie {...comun} />
       <Avanzado
