@@ -24,14 +24,19 @@
 - **API REST:** `GET`, `POST`, `PATCH`, `DELETE` en `/api/productos`.
 - **UI Catálogo (`cliente/vista-productos.tsx`):**
   - Listado de productos con KPIs en tiempo real (total, activos, sin stock).
-  - Hover gris en registros y clic en la fila completa para abrir el editor.
+  - Hover clarito y sutil en registros (`hover:bg-black/[0.02] dark:hover:bg-white/[0.03]`) y clic en la fila completa para abrir el editor.
   - Botón de edición dedicado (`Pencil`) con formulario/modal para editar nombre, SKU, categoría, precio, stock, descripción y estado activo.
   - Borrado y cambio rápido de estado activo/inactivo.
 
 ### 3. Modo Oscuro Global (Dark Mode)
 - **Componente:** `cliente/interruptor-tema.tsx` (icono de Sol y Luna con persistencia en `localStorage`).
 - **Ubicación:** Arriba a la izquierda en la barra lateral de escritorio y en la cabecera móvil.
-- **Estilos globales:** `app/globals.css` adaptado con variables CSS completas (`html.dark`) y script anti-parpadeo en `app/layout.tsx`.
+- **Estilos globales:** `app/globals.css` adaptado con variables CSS completas (`html.dark`), soporte nativo para Tailwind v4 (`@custom-variant dark`) y script anti-parpadeo en `app/layout.tsx`.
+
+### 4. Navegación en Ajustes y Multi-Modelo con Iconos
+- **Vista Configuración (`cliente/vista-configuracion.tsx`):** Barra superior horizontal de tabs limpias y adaptativas que no deforman el ancho centrado de 880px del CRM.
+- **Selector de Modelos (`cliente/configuracion/asistente.tsx`):** Selección visual con íconos oficiales de cada proveedor (OpenAI, Google Gemini, Anthropic Claude), precios de referencia por millón de tokens y entrada segura para `OPENAI_API_KEY`.
+- **Conexiones (`cliente/configuracion/conexiones.tsx`):** Desacoplada la verificación de Claude para mantener WhatsApp y mensajes limpios.
 
 ### 3. Cotizaciones y Gestión de Ventas
 - **Tablas `ventas` y `lineas_venta`:** Asocia presupuestos a leads con estados (`borrador`, `pendiente_pago`, `pagada`, `cancelada`), cálculo automático de totales y líneas de detalle.
