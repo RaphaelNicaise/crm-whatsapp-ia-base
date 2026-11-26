@@ -19,12 +19,15 @@ export function IconoGemini({ className = "size-5" }: { className?: string }): J
   );
 }
 
-/** Logo oficial de Anthropic Claude: sol geométrico redondeado característico */
+/** Logo oficial de Anthropic Claude */
 export function IconoClaude({ className = "size-5" }: { className?: string }): JSX.Element {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M4.5 10.5C3.67 10.5 3 11.17 3 12s.67 1.5 1.5 1.5h1.75a1.25 1.25 0 0 0 1.25-1.25v-.5A1.25 1.25 0 0 0 6.25 10.5H4.5Zm15 0h-1.75a1.25 1.25 0 0 0-1.25 1.25v.5c0 .69.56 1.25 1.25 1.25h1.75c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5ZM12 3c-.83 0-1.5.67-1.5 1.5v1.75c0 .69.56 1.25 1.25 1.25h.5c.69 0 1.25-.56 1.25-1.25V4.5C13.5 3.67 12.83 3 12 3Zm0 15c-.69 0-1.25.56-1.25 1.25v1.75c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-1.75c0-.69-.56-1.25-1.25-1.25h-.5ZM6.16 5.1c-.59-.59-1.54-.59-2.12 0s-.59 1.54 0 2.12l1.24 1.24c.49.49 1.28.49 1.77 0l.35-.35c.49-.49.49-1.28 0-1.77L6.16 5.1Zm11.68 11.68c-.49-.49-1.28-.49-1.77 0l-.35.35c-.49.49-.49 1.28 0 1.77l1.24 1.24c.59.59 1.54.59 2.12 0s.59-1.54 0-2.12l-1.24-1.24ZM7.4 16.78l-1.24 1.24c-.59.59-.59 1.54 0 2.12s1.54.59 2.12 0l1.24-1.24c.49-.49.49-1.28 0-1.77l-.35-.35c-.49-.49-1.28-.49-1.77 0Zm11.68-11.68c-.59-.59-1.54-.59-2.12 0l-1.24 1.24c-.49.49-.49 1.28 0 1.77l.35.35c.49.49 1.28.49 1.77 0l1.24-1.24c.59-.58.59-1.53 0-2.12ZM12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z" />
-    </svg>
+    <img
+      src="/iconos/claude.png"
+      alt="Anthropic Claude"
+      className={`${className} object-contain`}
+      aria-hidden="true"
+    />
   );
 }
 
@@ -44,5 +47,5 @@ export function IconoModelo({ modelo, className = "size-5" }: { modelo: IdModelo
   if (modelo.startsWith("gemini")) {
     return <IconoGemini className={`${className} text-indigo-500 dark:text-indigo-400`} />;
   }
-  return <IconoClaude className={`${className} text-amber-600 dark:text-amber-500`} />;
+  return <IconoClaude className={className} />;
 }
