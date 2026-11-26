@@ -111,6 +111,126 @@ html.dark .cristal {
   border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
+/* ─── Modo Oscuro: Tarjetas de leads y tablero ─── */
+
+/* Tarjetas del tablero de clientes */
+html.dark .bg-lienzo\/50,
+html.dark [class*="bg-lienzo/50"] {
+  background-color: rgba(18, 18, 21, 0.5) !important;
+}
+
+/* Fondo del dropdown/overlay backdrop */
+html.dark .bg-black\/20 {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Chips y badges pequeños (Ejemplo, canal, etc.) */
+html.dark .bg-fondo {
+  background-color: #09090b !important;
+}
+
+/* Encabezados de columnas del tablero */
+html.dark .bg-tinta\/\[0\.04\],
+html.dark [class*="bg-tinta/[0.04]"] {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+/* Fondo del menú mobile: ya es oscuro, solo se oscurece un poco más */
+html.dark .bg-\[\#151515\] {
+  background-color: #0a0a0b !important;
+}
+
+/* Divisor / separador horizontal */
+html.dark .divide-linea > * + * {
+  border-color: #27272a !important;
+}
+
+/* Texto en bloque principal */
+html.dark .text-tinta\/80 {
+  color: rgba(244, 244, 245, 0.8) !important;
+}
+
+html.dark .text-tinta\/60 {
+  color: rgba(244, 244, 245, 0.6) !important;
+}
+
+/* Fondo de filas de tabla al hover */
+html.dark tr:hover td {
+  background-color: #222228 !important;
+}
+
+/* Drawer lateral del cliente (bg-white fijo en el aside) */
+html.dark aside[role="dialog"] {
+  background-color: #18181b !important;
+}
+
+/* Hilo / conversación: mensajes del agente */
+html.dark .bg-marca\/10,
+html.dark [class*="bg-marca/10"] {
+  background-color: rgba(47, 158, 110, 0.15) !important;
+}
+
+/* Notas y áreas con fondo ámbar/amarillo */
+html.dark .bg-atencion\/10,
+html.dark [class*="bg-atencion/10"] {
+  background-color: rgba(217, 147, 47, 0.15) !important;
+}
+
+/* Modal / diálogo flotante */
+html.dark [role="dialog"]:not(aside) {
+  background-color: #18181b !important;
+  border-color: #27272a !important;
+}
+
+/* Select / dropdown nativo */
+html.dark select option {
+  background-color: #18181b;
+  color: #f4f4f5;
+}
+
+/* Botón principal (bg-tinta): en dark mantiene visibilidad con gris oscuro */
+html.dark button.bg-tinta {
+  background-color: #27272a !important;
+  color: #f4f4f5 !important;
+}
+
+html.dark button.bg-tinta:hover {
+  background-color: #3f3f46 !important;
+}
+
+/* Hover sobre botones que usan bg-lienzo al hover */
+html.dark .hover\:bg-lienzo:hover {
+  background-color: #1c1c21 !important;
+}
+
+/* Focus rings y bordes */
+html.dark .focus-visible\:outline-tinta:focus-visible {
+  outline-color: #f4f4f5 !important;
+}
+
+html.dark .focus-visible\:border-tinta\/40:focus-visible {
+  border-color: rgba(244, 244, 245, 0.4) !important;
+}
+
+/* Scrollbar en modo oscuro */
+html.dark ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: #18181b;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+  border-radius: 3px;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #52525b;
+}
+
 
 /* Los tres puntos de «escribiendo…» (animate-escribiendo). */
 @keyframes escribiendo {
