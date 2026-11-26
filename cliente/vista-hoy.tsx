@@ -82,7 +82,7 @@ function Cabecera({ bd, ahora, llegadas }: { bd: Bd; ahora: Date; llegadas: { po
             onClick={() => (paso ? puesta.abrir(paso) : irA("configuracion", { bloque: "whatsapp" }))}
             className="cursor-pointer font-medium underline underline-offset-[3px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tinta max-lg:-my-3 max-lg:py-3"
           >
-            Arreglar
+            Configurar
           </button>
         </span>
       </div>

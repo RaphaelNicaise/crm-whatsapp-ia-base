@@ -188,7 +188,7 @@ function LineaFallo({ entrada }: { entrada: EstadoLlegada }) {
     <div className="flex items-start gap-2 max-lg:flex-wrap max-lg:items-center">
       <p className="min-w-0 flex-1 text-[13px] leading-[18px] break-words text-error-texto max-lg:basis-full">No le ha llegado el WhatsApp: {fallo.texto}</p>
       <button type="button" onClick={arreglar} className={`${BOTON_LINEA} -my-0.5 bg-error/10 text-error-texto hover:bg-error/15`}>
-        Arreglar
+        Configurar
       </button>
       <button
         type="button"

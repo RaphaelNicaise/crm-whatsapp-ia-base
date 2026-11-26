@@ -28,15 +28,18 @@
   - Botón de edición dedicado (`Pencil`) con formulario/modal para editar nombre, SKU, categoría, precio, stock, descripción y estado activo.
   - Borrado y cambio rápido de estado activo/inactivo.
 
-### 3. Modo Oscuro Global (Dark Mode)
+### 3. Modo Oscuro Global (Dark Mode) y Adaptación de Chats
 - **Componente:** `cliente/interruptor-tema.tsx` (icono de Sol y Luna con persistencia en `localStorage`).
 - **Ubicación:** Arriba a la izquierda en la barra lateral de escritorio y en la cabecera móvil.
+- **Chats en Dark Mode:**
+  - `cliente/hilo.tsx` y `cliente/chat-de-prueba.tsx` adaptados con colores WhatsApp Dark (`#0b141a` fondo, `#202c33` mensajes de cliente, `#005c4b` mensajes del asistente/agente, texto `#e9edef`).
 - **Estilos globales:** `app/globals.css` adaptado con variables CSS completas (`html.dark`), soporte nativo para Tailwind v4 (`@custom-variant dark`) y script anti-parpadeo en `app/layout.tsx`.
 
 ### 4. Navegación en Ajustes y Multi-Modelo con Iconos
-- **Vista Configuración (`cliente/vista-configuracion.tsx`):** Barra superior horizontal de tabs limpias y adaptativas que no deforman el ancho centrado de 880px del CRM.
-- **Selector de Modelos (`cliente/configuracion/asistente.tsx`):** Selección visual con íconos oficiales de cada proveedor (OpenAI, Google Gemini, Anthropic Claude), precios de referencia por millón de tokens y entrada segura para `OPENAI_API_KEY`.
-- **Conexiones (`cliente/configuracion/conexiones.tsx`):** Desacoplada la verificación de Claude para mantener WhatsApp y mensajes limpios.
+- **Vista Configuración (`cliente/vista-configuracion.tsx`):** Navegación lateral de tabs intacta como en la versión previa, con icono oficial de WhatsApp en la sección de mensajería.
+- **Botón Conectar/Configurar (`cliente/configuracion/conexiones.tsx`):** Sustituido "Arreglar" por "Conectar" / "Configurar".
+- **Selector de Modelos (`cliente/configuracion/asistente.tsx`):** Selección visual con íconos vectoriales oficiales de OpenAI, Google Gemini y Anthropic Claude.
+- **Buscador Paleta (`cliente/paleta.tsx`):** Placeholder "Buscar cliente o funcionalidad…" y foco automático directo al input del modal al abrir.
 
 ### 3. Cotizaciones y Gestión de Ventas
 - **Tablas `ventas` y `lineas_venta`:** Asocia presupuestos a leads con estados (`borrador`, `pendiente_pago`, `pagada`, `cancelada`), cálculo automático de totales y líneas de detalle.

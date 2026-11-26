@@ -43,6 +43,7 @@ html.dark {
   --color-lienzo: #121215;
   --color-linea: #27272a;
   --color-fondo-suave: #1c1c21;
+  --burbuja-agente-bg: #005c4b;
 }
 
 html.dark body {

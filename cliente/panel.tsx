@@ -400,7 +400,7 @@ function MarcoPanel({ bd, conectado, refrescar }: { bd: Bd; conectado: boolean; 
 
         <div className="relative mt-5">
           <label htmlFor="buscar-barra" className="sr-only">
-            {frases.buscarPlaceholder}
+            Buscar cliente o funcionalidad
           </label>
           <Search aria-hidden className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-white/45" strokeWidth={1.75} />
           <input
@@ -408,7 +408,7 @@ function MarcoPanel({ bd, conectado, refrescar }: { bd: Bd; conectado: boolean; 
             type="search"
             autoComplete="off"
             value={campo}
-            placeholder={frases.buscarPlaceholder}
+            placeholder="Buscar cliente o funcionalidad…"
             onChange={(evento) => abrirPaleta(evento.target.value)}
             onClick={() => abrirPaleta(campo)}
             onKeyDown={(evento: EventoTeclado<HTMLInputElement>) => {

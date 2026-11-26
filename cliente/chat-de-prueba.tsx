@@ -147,14 +147,14 @@ export function ChatDePrueba(p: { origen?: "formulario" | "whatsapp"; alContesta
   const ultimoModelo = resultados.at(-1)?.modelo ?? "";
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-[12px] border border-linea bg-white">
+    <div className="flex flex-col overflow-hidden rounded-[12px] border border-linea bg-white dark:bg-[#121b22]">
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-linea px-4 py-3">
         <p className="text-[13px] leading-[18px] text-secundario">Escríbele como si fueras un cliente. No se envía nada por WhatsApp.</p>
         <div className="flex items-center gap-2 max-lg:flex-wrap">
           <span id={`${id}-empieza`} className="text-[13px] leading-[18px] text-secundario">
             Empieza por:
           </span>
-          <div role="group" aria-labelledby={`${id}-empieza`} className="flex rounded-[8px] bg-fondo p-0.5">
+          <div role="group" aria-labelledby={`${id}-empieza`} className="flex rounded-[8px] bg-fondo dark:bg-[#182229] p-0.5">
             {(["formulario", "whatsapp"] as const).map((o) => (
               <button
                 key={o}
@@ -164,7 +164,7 @@ export function ChatDePrueba(p: { origen?: "formulario" | "whatsapp"; alContesta
                   if (origen !== o) empezar(o);
                 }}
                 className={`h-7 rounded-[6px] px-3 text-[13px] max-lg:min-h-11 max-lg:px-4 leading-[18px] transition-colors duration-200 ease-out focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-tinta ${
-                  origen === o ? "cursor-default bg-white font-medium shadow-[0_1px_2px_rgba(20,20,20,0.08)]" : "cursor-pointer text-secundario hover:text-tinta"
+                  origen === o ? "cursor-default bg-white dark:bg-[#202c33] font-medium shadow-[0_1px_2px_rgba(20,20,20,0.08)] text-tinta dark:text-[#e9edef]" : "cursor-pointer text-secundario hover:text-tinta dark:hover:text-[#e9edef]"
                 }`}
               >
                 {o === "formulario" ? "Formulario" : "WhatsApp"}
@@ -176,7 +176,7 @@ export function ChatDePrueba(p: { origen?: "formulario" | "whatsapp"; alContesta
 
       {/* Crece con la conversación: vacía, solo la invitación; larga, se desplaza por dentro. */}
       {/* Con el teclado del móvil abierto, la conversación encoge y el campo sigue a la vista. */}
-      <div ref={lista} className="flex max-h-[420px] min-h-[96px] flex-col max-lg:max-h-[min(420px,50dvh)] gap-3 overflow-y-auto bg-lienzo/60 px-4 py-4">
+      <div ref={lista} className="flex max-h-[420px] min-h-[96px] flex-col max-lg:max-h-[min(420px,50dvh)] gap-3 overflow-y-auto bg-lienzo/60 dark:bg-[#0b141a] px-4 py-4">
         {prueba.mensajes.length === 0 && !esperando && (
           <p className="m-auto max-w-[320px] text-center text-[13px] leading-[18px] text-secundario">
             Escribe lo primero que te mandaría un cliente por WhatsApp, por ejemplo «Hola, ¿tenéis cita esta semana?».
@@ -190,7 +190,7 @@ export function ChatDePrueba(p: { origen?: "formulario" | "whatsapp"; alContesta
               {turno && turno.acciones.length > 0 && (
                 <ul className={`flex flex-wrap gap-1.5 ${m.de === "cliente" ? "justify-end" : ""}`}>
                   {turno.acciones.map((a) => (
-                    <li key={a.texto} className={`rounded-full border bg-white px-2.5 py-0.5 text-[12px] leading-[18px] ${TONO_ACCION[a.tono]}`}>
+                    <li key={a.texto} className={`rounded-full border bg-white dark:bg-[#202c33] dark:text-[#e9edef] px-2.5 py-0.5 text-[12px] leading-[18px] ${TONO_ACCION[a.tono]}`}>
                       {a.texto}
                     </li>
                   ))}
@@ -205,7 +205,7 @@ export function ChatDePrueba(p: { origen?: "formulario" | "whatsapp"; alContesta
         {esperando && (
           <div className="flex flex-col items-start gap-1">
             <span className="px-1 text-[12px] leading-4 text-secundario">Tu asistente</span>
-            <span className="inline-flex items-center gap-2 rounded-[14px] rounded-tl-[4px] border border-linea bg-white px-3.5 py-2.5 text-[13px] leading-[18px] text-secundario">
+            <span className="inline-flex items-center gap-2 rounded-[14px] rounded-tl-[4px] border border-linea bg-white dark:bg-[#202c33] dark:text-[#e9edef] px-3.5 py-2.5 text-[13px] leading-[18px] text-secundario">
               <span aria-hidden className="flex gap-1">
                 {[0, 1, 2].map((n) => (
                   <span
@@ -281,8 +281,8 @@ function Burbuja(p: { de: "cliente" | "agente"; texto: string; plantilla: boolea
   if (p.de === "cliente") {
     return (
       <div className="flex flex-col items-end gap-1">
-        <span className="px-1 text-[12px] leading-4 text-secundario">{NOMBRE_PRUEBA}</span>
-        <p className="max-w-[80%] rounded-[14px] rounded-tr-[4px] bg-tinta px-3.5 py-2.5 text-[14px] leading-5 whitespace-pre-wrap text-white [overflow-wrap:anywhere]">
+        <span className="px-1 text-[12px] leading-4 text-secundario dark:text-[#8696a0]">{NOMBRE_PRUEBA}</span>
+        <p className="max-w-[80%] rounded-[14px] rounded-tr-[4px] bg-tinta px-3.5 py-2.5 text-[14px] leading-5 whitespace-pre-wrap text-white dark:bg-[#202c33] dark:text-[#e9edef] dark:border dark:border-white/5 [overflow-wrap:anywhere]">
           {p.texto}
         </p>
       </div>
@@ -290,8 +290,8 @@ function Burbuja(p: { de: "cliente" | "agente"; texto: string; plantilla: boolea
   }
   return (
     <div className="flex flex-col items-start gap-1">
-      <span className="px-1 text-[12px] leading-4 text-secundario">{p.plantilla ? "Mensaje de bienvenida" : "Tu asistente"}</span>
-      <p className="max-w-[80%] rounded-[14px] rounded-tl-[4px] border border-marca/25 bg-marca/10 px-3.5 py-2.5 text-[14px] leading-5 whitespace-pre-wrap text-tinta [overflow-wrap:anywhere]">
+      <span className="px-1 text-[12px] leading-4 text-secundario dark:text-[#8696a0]">{p.plantilla ? "Mensaje de bienvenida" : "Tu asistente"}</span>
+      <p className="max-w-[80%] rounded-[14px] rounded-tl-[4px] border border-marca/25 bg-marca/10 px-3.5 py-2.5 text-[14px] leading-5 whitespace-pre-wrap text-tinta dark:bg-[#005c4b] dark:text-[#e9edef] dark:border-[#005c4b] [overflow-wrap:anywhere]">
         {p.texto}
       </p>
     </div>

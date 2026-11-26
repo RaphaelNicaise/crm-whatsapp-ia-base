@@ -251,6 +251,12 @@ function Fila(p: { fila: FilaConexion; comprobar: (forzar?: boolean) => Promise<
   const [arreglando, setArreglando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const accion = fila.accion;
+  const textoBoton =
+    accion?.texto === "Arreglar"
+      ? fila.id === "whatsapp"
+        ? "Conectar"
+        : "Configurar"
+      : (accion?.texto ?? "Configurar");
 
   const hacer = async () => {
     if (!accion) return;
@@ -283,8 +289,8 @@ function Fila(p: { fila: FilaConexion; comprobar: (forzar?: boolean) => Promise<
         )}
       </div>
       {accion && (accion.arreglar || accion.paso) && (
-        <button type="button" onClick={() => void hacer()} disabled={arreglando} aria-label={`${accion.texto}: ${fila.nombre}`} className={`${ESTILOS_TOQUE.botonSecundario} h-8 px-3 text-[13px]`}>
-          {arreglando ? "Arreglando…" : accion.texto}
+        <button type="button" onClick={() => void hacer()} disabled={arreglando} aria-label={`${textoBoton}: ${fila.nombre}`} className={`${ESTILOS_TOQUE.botonSecundario} h-8 px-3 text-[13px]`}>
+          {arreglando ? "Conectando…" : textoBoton}
         </button>
       )}
     </li>

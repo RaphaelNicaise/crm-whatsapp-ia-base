@@ -1,9 +1,9 @@
 "use client";
 
-import { Bot, Building2, CalendarDays, Globe, KeyRound, Layers, Plug, Settings2, Users, type LucideIcon } from "lucide-react";
-import { useCallback, useEffect, useRef, useState, type JSX } from "react";
+import { Bot, Building2, CalendarDays, Globe, Plug, Settings2, Users } from "lucide-react";
+import { useCallback, useEffect, useRef, useState, type ComponentType, type JSX } from "react";
 import type { EstadoPlantilla } from "@/lib/api-tipos";
-import { SECCIONES_CONFIGURACION, type IdSeccionConfiguracion } from "@/lib/configuracion";
+import type { IdSeccionConfiguracion } from "@/lib/configuracion";
 import type { Bd } from "@/lib/tipos";
 import { leerPlantillas } from "./api-sistema";
 import { confirmar } from "./confirmaciones";
@@ -12,32 +12,26 @@ import { useConfiguracion } from "./configuracion/api";
 import { BloqueAsistente } from "./configuracion/asistente";
 import { Avanzado } from "./configuracion/avanzado";
 import { Conexiones } from "./configuracion/conexiones";
-import { Bloque, BOTON, menosMovimiento } from "./configuracion/controles";
+import { Bloque, BOTON } from "./configuracion/controles";
 import { BloqueEquipo } from "./configuracion/equipo";
+import { IconoWhatsApp } from "./configuracion/iconos-modelos";
 import { BloqueMcp } from "./configuracion/mcp";
 import { BloqueNegocio } from "./configuracion/negocio";
 import { Pie } from "./configuracion/pie";
 import { BloqueWeb } from "./configuracion/web";
 import { irA } from "./navegacion";
 
-type TabFiltro = "todas" | "negocio" | "asistente" | "agenda" | "whatsapp" | "equipo" | "mcp" | "web" | "avanzado";
+type TabAjustes = "negocio" | "asistente" | "agenda" | "whatsapp" | "equipo" | "mcp" | "web" | "avanzado";
 
-interface ItemNav {
-  id: TabFiltro;
-  nombre: string;
-  Icono: LucideIcon;
-}
-
-const ITEMS_NAV: ItemNav[] = [
-  { id: "todas", nombre: "Ver todo", Icono: Layers },
+const TABS: { id: TabAjustes; nombre: string; Icono: ComponentType<{ className?: string }> }[] = [
   { id: "negocio", nombre: "Negocio", Icono: Building2 },
-  { id: "asistente", nombre: "Tu Asistente", Icono: Bot },
-  { id: "agenda", nombre: "Agenda", Icono: CalendarDays },
-  { id: "whatsapp", nombre: "WhatsApp", Icono: KeyRound },
-  { id: "equipo", nombre: "Equipo", Icono: Users },
-  { id: "mcp", nombre: "MCP", Icono: Plug },
-  { id: "web", nombre: "Web", Icono: Globe },
-  { id: "avanzado", nombre: "Avanzado", Icono: Settings2 },
+  { id: "asistente", nombre: "Tu Asistente y Modelos", Icono: Bot },
+  { id: "agenda", nombre: "Agenda y Horarios", Icono: CalendarDays },
+  { id: "whatsapp", nombre: "WhatsApp / Conexiones", Icono: IconoWhatsApp },
+  { id: "equipo", nombre: "Equipo y Usuarios", Icono: Users },
+  { id: "mcp", nombre: "Servidor MCP", Icono: Plug },
+  { id: "web", nombre: "Web Pública", Icono: Globe },
+  { id: "avanzado", nombre: "Avanzado y Datos", Icono: Settings2 },
 ];
 
 export function VistaConfiguracion(p: { bd: Bd; refrescar: () => Promise<void>; bloque: string | null }): JSX.Element {
@@ -45,12 +39,11 @@ export function VistaConfiguracion(p: { bd: Bd; refrescar: () => Promise<void>; 
   const { datos, error, recargar } = useConfiguracion(bd.configuracion?.firma);
   const [plantillas, setPlantillas] = useState<EstadoPlantilla[] | null>(null);
   const [informacionNueva, setInformacionNueva] = useState<{ texto: string; vez: number } | null>(null);
-  const [filtro, setFiltro] = useState<TabFiltro>((bloque as TabFiltro) || "todas");
+  const [tab, setTab] = useState<TabAjustes>((bloque as TabAjustes) || "negocio");
 
   const releerPlantillas = useCallback(async () => {
     setPlantillas(await leerPlantillas());
   }, []);
-
   useEffect(() => {
     void releerPlantillas();
   }, [releerPlantillas]);
@@ -65,14 +58,14 @@ export function VistaConfiguracion(p: { bd: Bd; refrescar: () => Promise<void>; 
   }, [datos?.avisos]);
 
   useEffect(() => {
-    if (bloque && ITEMS_NAV.some((t) => t.id === bloque)) {
-      setFiltro(bloque as TabFiltro);
+    if (bloque && TABS.some((t) => t.id === bloque)) {
+      setTab(bloque as TabAjustes);
     }
   }, [bloque]);
 
   const irABloque = useCallback((id: IdSeccionConfiguracion) => {
     irA("configuracion", { bloque: id });
-    if (ITEMS_NAV.some((t) => t.id === id)) setFiltro(id as TabFiltro);
+    if (TABS.some((t) => t.id === id)) setTab(id as TabAjustes);
   }, []);
 
   if (!datos) {
@@ -96,44 +89,38 @@ export function VistaConfiguracion(p: { bd: Bd; refrescar: () => Promise<void>; 
 
   const comun = { datos, recargar, refrescar };
 
-  const mostrar = (id: TabFiltro) => filtro === "todas" || filtro === id;
-
   return (
-    <div className="w-full pb-12">
-      {/* Barra horizontal de navegación rápida, sin deformar el ancho de las tarjetas */}
-      <div className="sticky top-0 z-20 -mx-1 mb-6 bg-lienzo/90 px-1 py-2 backdrop-blur-md">
-        <nav aria-label="Secciones de ajustes" className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-          {ITEMS_NAV.map(({ id, nombre, Icono }) => {
-            const activa = filtro === id;
-            return (
-              <button
-                key={id}
-                type="button"
-                onClick={() => setFiltro(id)}
-                className={`flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-[12.5px] font-medium transition-all duration-150 ${
-                  activa
-                    ? "bg-tinta text-white shadow-xs dark:bg-white dark:text-black"
-                    : "border border-linea bg-white text-secundario hover:bg-black/[0.02] hover:text-tinta dark:bg-lienzo dark:hover:bg-white/[0.03]"
-                }`}
-              >
-                <Icono className="size-3.5 shrink-0" strokeWidth={1.75} />
-                <span>{nombre}</span>
-              </button>
-            );
-          })}
-        </nav>
-      </div>
+    <div className="flex w-full flex-col gap-6 pb-10 md:flex-row md:items-start">
+      {/* Sub-navegación lateral ordenada */}
+      <nav aria-label="Secciones de ajustes" className="flex shrink-0 flex-row gap-1 overflow-x-auto pb-2 md:w-56 md:flex-col md:pb-0">
+        {TABS.map(({ id, nombre, Icono }) => {
+          const activa = tab === id;
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setTab(id)}
+              className={`flex shrink-0 cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[13px] transition-colors ${
+                activa ? "bg-marca/10 font-semibold text-marca dark:bg-marca/20 dark:text-marca" : "text-secundario hover:bg-black/[0.03] dark:hover:bg-white/[0.04] hover:text-tinta"
+              }`}
+            >
+              <Icono className="size-4 shrink-0" />
+              <span>{nombre}</span>
+            </button>
+          );
+        })}
+      </nav>
 
-      {/* Contenedor vertical con ancho completo y espaciado consistente */}
-      <div className="flex flex-col gap-6">
-        {mostrar("negocio") && (
-          <Bloque id="ajustes-negocio" titulo="Tu Negocio">
+      {/* Contenido de la sección seleccionada */}
+      <div className="min-w-0 flex-1 space-y-5">
+        {tab === "negocio" && (
+          <Bloque id="ajustes-negocio" titulo="Configuración del Negocio">
             <BloqueNegocio {...comun} plantillas={plantillas} />
           </Bloque>
         )}
 
-        {mostrar("asistente") && (
-          <Bloque id="ajustes-asistente" titulo="Tu Asistente y Modelos de IA">
+        {tab === "asistente" && (
+          <Bloque id="ajustes-asistente" titulo="Tu Asistente y Modelos">
             <BloqueAsistente
               {...comun}
               bd={bd}
@@ -144,13 +131,13 @@ export function VistaConfiguracion(p: { bd: Bd; refrescar: () => Promise<void>; 
           </Bloque>
         )}
 
-        {mostrar("agenda") && (
-          <Bloque id="ajustes-agenda" titulo="Horario de Citas y Agenda">
+        {tab === "agenda" && (
+          <Bloque id="ajustes-agenda" titulo="Agenda y Horarios de Atención">
             <BloqueAgenda {...comun} bd={bd} />
           </Bloque>
         )}
 
-        {mostrar("whatsapp") && (
+        {tab === "whatsapp" && (
           <Bloque id="ajustes-whatsapp" titulo="WhatsApp y Conexiones">
             <div className="pt-3 pb-4">
               <Conexiones />
@@ -158,30 +145,27 @@ export function VistaConfiguracion(p: { bd: Bd; refrescar: () => Promise<void>; 
           </Bloque>
         )}
 
-        {mostrar("equipo") && (
+        {tab === "equipo" && (
           <Bloque id="ajustes-equipo" titulo="Equipo y Usuarios">
             <BloqueEquipo />
           </Bloque>
         )}
 
-        {mostrar("mcp") && (
-          <Bloque id="ajustes-mcp" titulo="Servidor MCP">
+        {tab === "mcp" && (
+          <Bloque id="ajustes-mcp" titulo="Servidor MCP (Conexión Externa)">
             <BloqueMcp />
           </Bloque>
         )}
 
-        {mostrar("web") && (
-          <Bloque id="ajustes-web" titulo="Tu Web Pública">
+        {tab === "web" && (
+          <Bloque id="ajustes-web" titulo="Web Pública de Captación">
             <BloqueWeb {...comun} />
           </Bloque>
         )}
 
-        {mostrar("avanzado") && (
-          <div className="space-y-6">
-            <Bloque id="ajustes-datos" titulo="Datos y Ejemplos">
-              <Pie {...comun} />
-            </Bloque>
-
+        {tab === "avanzado" && (
+          <div className="space-y-5">
+            <Pie {...comun} />
             <Avanzado
               {...comun}
               irABloque={irABloque}

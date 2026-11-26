@@ -63,12 +63,17 @@ function Contenido({ inicial, cerrar, leads, secciones }: Props) {
     };
   }, []);
 
-  // Lo que venía escrito de la barra lateral: se sigue escribiendo detrás.
+  // Lo que venía escrito de la barra lateral: se sigue escribiendo detrás y el foco se coloca firmemente en el input.
   useEffect(() => {
-    const e = entrada.current;
-    if (!e) return;
-    e.focus();
-    e.setSelectionRange(e.value.length, e.value.length);
+    const enfocar = () => {
+      const e = entrada.current;
+      if (!e) return;
+      e.focus({ preventScroll: true });
+      e.setSelectionRange(e.value.length, e.value.length);
+    };
+    enfocar();
+    const t = requestAnimationFrame(enfocar);
+    return () => cancelAnimationFrame(t);
   }, []);
 
   const texto = consulta.trim();
@@ -187,7 +192,7 @@ function Contenido({ inicial, cerrar, leads, secciones }: Props) {
         aria-modal="true"
         aria-label="Buscar"
         onMouseDown={(evento) => evento.stopPropagation()}
-        className="w-full max-w-[600px] overflow-hidden rounded-[16px] bg-white shadow-[0_16px_48px_rgba(0,0,0,0.22)] max-lg:flex max-lg:h-[100dvh] max-lg:max-w-none max-lg:flex-col max-lg:rounded-none"
+        className="w-full max-w-[600px] overflow-hidden rounded-[16px] bg-white dark:bg-[#18181b] dark:border dark:border-white/10 shadow-[0_16px_48px_rgba(0,0,0,0.22)] max-lg:flex max-lg:h-[100dvh] max-lg:max-w-none max-lg:flex-col max-lg:rounded-none"
       >
         <div className="flex items-center gap-3 border-b border-linea px-4 max-lg:shrink-0 max-lg:pr-1.5">
           <Search aria-hidden className="size-[18px] shrink-0 text-secundario" strokeWidth={1.75} />
@@ -200,14 +205,14 @@ function Contenido({ inicial, cerrar, leads, secciones }: Props) {
               setActivo(0);
             }}
             onKeyDown={alPulsar}
-            placeholder={frases.buscarPlaceholder}
-            aria-label={frases.buscarPlaceholder}
+            placeholder="Buscar cliente o funcionalidad…"
+            aria-label="Buscar cliente o funcionalidad"
             role="combobox"
             aria-expanded="true"
             aria-autocomplete="list"
             aria-controls={`${id}-lista`}
             aria-activedescendant={resultados.length ? `${id}-${seleccionado}` : undefined}
-            className="h-14 min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-secundario"
+            className="h-14 min-w-0 flex-1 bg-transparent text-[15px] text-tinta outline-none placeholder:text-secundario"
           />
           <kbd className="shrink-0 rounded-[6px] border border-linea px-1.5 py-0.5 font-mono text-[11px] text-secundario max-lg:hidden">Esc</kbd>
           {/* Sin teclado no hay Escape: en el móvil, una ✕ para cerrar. */}

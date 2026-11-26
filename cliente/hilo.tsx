@@ -12,15 +12,15 @@ import { haceCuanto } from "./piezas";
 // negocio a la derecha, la hora dentro de cada burbuja con las marcas de entrega de Meta, los días
 // separados y los mensajes seguidos agrupados. Un hilo corto se queda pegado abajo, junto a la caja.
 
-/** El verde de la burbuja del asistente: el color de la marca, muy claro. */
-const FONDO_ASISTENTE = "color-mix(in oklab, var(--color-marca) 14%, white)";
+/** El verde de la burbuja del asistente: el color de la marca en claro, o variable en oscuro. */
+const FONDO_ASISTENTE = "var(--burbuja-agente-bg, color-mix(in oklab, var(--color-marca) 14%, white))";
 
 function Entrega({ m }: { m: Mensaje }) {
   switch (m.entrega) {
     case "enviado":
-      return <Check role="img" aria-label="Enviado" className="size-3.5 text-secundario" strokeWidth={2} />;
+      return <Check role="img" aria-label="Enviado" className="size-3.5 text-secundario dark:text-[#8696a0]" strokeWidth={2} />;
     case "entregado":
-      return <CheckCheck role="img" aria-label="Entregado" className="size-3.5 text-secundario" strokeWidth={2} />;
+      return <CheckCheck role="img" aria-label="Entregado" className="size-3.5 text-secundario dark:text-[#8696a0]" strokeWidth={2} />;
     case "leido":
       return <CheckCheck role="img" aria-label="Leído" className="size-3.5 text-[#53bdeb]" strokeWidth={2} />;
     default:
@@ -34,7 +34,11 @@ function Burbuja({ m, tipo, ultima }: { m: Mensaje; tipo: Grupo["tipo"]; ultima:
   const fallido = !deCliente && m.entrega === "fallido";
   const conMarca = !deCliente && (m.entrega === "enviado" || m.entrega === "entregado" || m.entrega === "leido");
   const esquina = ultima ? (deCliente ? "rounded-bl-[4px]" : "rounded-br-[4px]") : "";
-  const fondo = deCliente ? "bg-white" : tipo === "manual" ? "bg-fondo" : "";
+  const fondo = deCliente
+    ? "bg-white text-tinta dark:bg-[#202c33] dark:text-[#e9edef] dark:border dark:border-white/5"
+    : tipo === "manual"
+      ? "bg-fondo text-tinta dark:bg-[#182229] dark:text-[#e9edef] dark:border dark:border-white/10"
+      : "text-tinta dark:text-[#e9edef]";
 
   return (
     <div
@@ -44,7 +48,7 @@ function Burbuja({ m, tipo, ultima }: { m: Mensaje; tipo: Grupo["tipo"]; ultima:
       style={!deCliente && tipo !== "manual" ? { background: FONDO_ASISTENTE } : undefined}
     >
       {m.audio && (
-        <span className="mb-0.5 flex items-center gap-1 text-[11px] leading-4 font-medium text-secundario">
+        <span className="mb-0.5 flex items-center gap-1 text-[11px] leading-4 font-medium text-secundario dark:text-[#8696a0]">
           <Mic aria-hidden className="size-3" strokeWidth={2} />
           Nota de voz · transcrita
         </span>
@@ -56,13 +60,13 @@ function Burbuja({ m, tipo, ultima }: { m: Mensaje; tipo: Grupo["tipo"]; ultima:
       </p>
       {fallido ? (
         <span className="mt-0.5 flex items-center justify-end gap-1.5 text-[11px] leading-4 tabular-nums">
-          <span className="text-secundario">{formato.hora(m.ts)}</span>
+          <span className="text-secundario dark:text-[#8696a0]">{formato.hora(m.ts)}</span>
           <span className="font-medium text-error-texto" title={m.fallo} aria-label={`No entregado: ${m.fallo ?? ""}`.trim()}>
             No entregado
           </span>
         </span>
       ) : (
-        <span className="absolute right-2.5 bottom-1.5 flex items-center gap-1 text-[11px] leading-4 text-secundario tabular-nums">
+        <span className="absolute right-2.5 bottom-1.5 flex items-center gap-1 text-[11px] leading-4 text-secundario dark:text-[#8696a0] tabular-nums">
           {formato.hora(m.ts)}
           {conMarca && <Entrega m={m} />}
         </span>
@@ -74,12 +78,12 @@ function Burbuja({ m, tipo, ultima }: { m: Mensaje; tipo: Grupo["tipo"]; ultima:
 function Escribiendo() {
   return (
     <div className="flex flex-col items-end gap-1" role="status">
-      <div className="flex items-center gap-2 rounded-[12px] rounded-br-[4px] px-3 py-2 text-[13px] leading-[18px] text-tinta/70" style={{ background: FONDO_ASISTENTE }}>
+      <div className="flex items-center gap-2 rounded-[12px] rounded-br-[4px] px-3 py-2 text-[13px] leading-[18px] text-tinta/70 dark:text-[#e9edef]" style={{ background: FONDO_ASISTENTE }}>
         <span aria-hidden className="flex gap-[3px]">
           {[0, 1, 2].map((i) => (
             <span
               key={i}
-              className="size-[5px] rounded-full bg-tinta/60 motion-safe:animate-escribiendo"
+              className="size-[5px] rounded-full bg-tinta/60 dark:bg-[#e9edef]/80 motion-safe:animate-escribiendo"
               style={{ animationDelay: `${i * 160}ms` }}
             />
           ))}
@@ -116,14 +120,14 @@ export function Hilo(p: { lead: Lead; escribiendo: boolean; ahora: number; conte
   }, [lead.id, total, escribiendo, callado]);
 
   return (
-    <div ref={caja} className="min-h-0 flex-1 overflow-y-auto bg-lienzo" aria-label="Mensajes" role="log">
+    <div ref={caja} className="min-h-0 flex-1 overflow-y-auto bg-lienzo dark:bg-[#0b141a]" aria-label="Mensajes" role="log">
       <div className="flex min-h-full flex-col justify-end gap-3 px-5 py-5">
         {total === 0 && <p className="m-auto text-[13px] leading-[18px] text-secundario">Aún no hay mensajes.</p>}
 
         {items.map((item, i) =>
           item.tipo === "dia" ? (
             <div key={`dia-${i}`} className="flex justify-center pt-1">
-              <span className="rounded-full bg-white/80 px-2.5 py-0.5 text-[12px] leading-4 text-secundario shadow-[0_1px_1px_rgba(20,20,20,0.04)]">
+              <span className="rounded-full bg-white/80 dark:bg-[#182229] px-2.5 py-0.5 text-[12px] leading-4 text-secundario dark:text-[#8696a0] shadow-[0_1px_1px_rgba(20,20,20,0.04)]">
                 {item.texto}
               </span>
             </div>
