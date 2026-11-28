@@ -31,8 +31,8 @@ Permitir gestionar el CRM, consultar leads, responder mensajes y ajustar el comp
 ## 2. Interfaz Multimodelo y Dashboard de Consumo IA
 Ya tenemos el backend con OpenAI, Gemini, Claude y la tabla `consumo_ia` en Drizzle; falta exponerlo visualmente en el panel.
 
-- [ ] Agregar en **Ajustes → Tu asistente** el selector visual para elegir entre `GPT-4o Mini`, `Gemini 2.0 Flash`, `Claude Haiku` y `Claude Sonnet` mostrando el costo por millón de tokens y recomendación de uso.
-- [ ] Permitir pegar y validar `OPENAI_API_KEY` y `GEMINI_API_KEY` directamente desde **Ajustes → Conexiones**.
+- [x] Agregar en **Ajustes → Tu asistente** el selector visual para elegir entre `GPT-4o Mini`, `Gemini 2.0 Flash`, `Claude Haiku` y `Claude Sonnet` mostrando el costo por millón de tokens y recomendación de uso.
+- [x] Permitir pegar y validar `OPENAI_API_KEY` y `GEMINI_API_KEY` directamente desde **Ajustes → Conexiones**.
 - [ ] Crear widget en **Hoy / Ajustes** mostrando el consumo mensual (conversaciones atendidas, tokens usados y costo en USD) + link directo a la recarga/Auto-topup del proveedor.
 - [ ] Agregar modo "Gestionado por Agencia" (variable de entorno) que oculte las API Keys cuando el servicio sea *Todo Incluido*.
 

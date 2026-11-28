@@ -60,6 +60,8 @@ export function VistaConfiguracion(p: { bd: Bd; refrescar: () => Promise<void>; 
   useEffect(() => {
     if (bloque && TABS.some((t) => t.id === bloque)) {
       setTab(bloque as TabAjustes);
+    } else if (!bloque) {
+      setTab("negocio");
     }
   }, [bloque]);
 

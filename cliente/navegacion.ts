@@ -39,7 +39,7 @@ export function leerUbicacion(url?: string): Ubicacion {
   if (ancla === "ajustes") return { vista: "configuracion", cliente: conCliente, bloque: null };
   if (ancla.startsWith("ajustes-")) {
     const sub = ancla.slice("ajustes-".length);
-    const seccion = SECCIONES_CONFIGURACION.find((s) => s.ancla === sub);
+    const seccion = SECCIONES_CONFIGURACION.find((s) => s.ancla === sub || s.id === sub);
     return { vista: "configuracion", cliente: conCliente, bloque: seccion ? seccion.id : sub };
   }
   return { vista: "hoy", cliente: conCliente, bloque: null };
@@ -53,7 +53,7 @@ export function hrefDe(u: Partial<Ubicacion>): string {
   let bloque: string | null = null;
   if (vista === "configuracion") {
     if (u.bloque !== undefined) bloque = u.bloque;
-    else if (u.vista === undefined || u.vista === actual.vista) bloque = actual.bloque;
+    else if (u.vista === undefined) bloque = actual.bloque;
   }
   let ancla = "";
   if (vista === "clientes") ancla = "#clientes";
@@ -67,22 +67,11 @@ export function hrefDe(u: Partial<Ubicacion>): string {
   return `/panel${cliente ? `?cliente=${encodeURIComponent(cliente)}` : ""}${ancla}`;
 }
 
-declare global {
-  var __crm_oyentes: Set<() => void> | undefined;
-}
-
-function obtenerOyentes(): Set<() => void> {
-  if (typeof window !== "undefined") {
-    if (!window.__crm_oyentes) {
-      window.__crm_oyentes = new Set();
-    }
-    return window.__crm_oyentes;
-  }
-  return new Set();
-}
+const oyentes = new Set<() => void>();
+let estadoActual: Ubicacion = typeof window !== "undefined" ? leerUbicacion() : { ...INICIO };
 
 function notificar(): void {
-  for (const oyente of obtenerOyentes()) {
+  for (const oyente of oyentes) {
     try {
       oyente();
     } catch {
@@ -91,18 +80,24 @@ function notificar(): void {
   }
 }
 
+if (typeof window !== "undefined") {
+  const alCambiarUrl = () => {
+    estadoActual = leerUbicacion();
+    notificar();
+  };
+  window.addEventListener("popstate", alCambiarUrl);
+  window.addEventListener("hashchange", alCambiarUrl);
+}
+
 function cambiarUrl(u: Partial<Ubicacion>): void {
   if (typeof window === "undefined") return;
   const nuevoHref = hrefDe(u);
-  guardada = null;
   try {
-    history.pushState(history.state, "", nuevoHref);
+    history.pushState(null, "", nuevoHref);
   } catch {
     window.location.href = nuevoHref;
   }
-  window.dispatchEvent(new Event("hashchange"));
-  window.dispatchEvent(new Event("popstate"));
-  window.dispatchEvent(new CustomEvent("crm-navegacion", { detail: u }));
+  estadoActual = leerUbicacion();
   notificar();
 }
 
@@ -119,30 +114,14 @@ export function cerrarCliente(): void {
 }
 
 function suscribir(avisar: () => void): () => void {
-  if (typeof window === "undefined") return () => {};
-  const oyentes = obtenerOyentes();
   oyentes.add(avisar);
-  window.addEventListener("popstate", avisar);
-  window.addEventListener("hashchange", avisar);
-  window.addEventListener("crm-navegacion", avisar);
   return () => {
     oyentes.delete(avisar);
-    window.removeEventListener("popstate", avisar);
-    window.removeEventListener("hashchange", avisar);
-    window.removeEventListener("crm-navegacion", avisar);
   };
 }
 
-// El mismo objeto mientras la URL no cambia: useSyncExternalStore compara por identidad.
-let guardada: { href: string; ubicacion: Ubicacion } | null = null;
-
 function instantanea(): Ubicacion {
-  if (typeof window === "undefined") return INICIO;
-  const href = window.location.href;
-  if (!guardada || guardada.href !== href) {
-    guardada = { href, ubicacion: leerUbicacion(href) };
-  }
-  return guardada.ubicacion;
+  return estadoActual;
 }
 
 // El servidor pinta siempre «hoy»: así no hay diferencias al hidratar.

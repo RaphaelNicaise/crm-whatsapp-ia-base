@@ -91,6 +91,20 @@ export function VistaProductos(): JSX.Element {
     setEditando(null);
   };
 
+  useEffect(() => {
+    if (!editando && !mostrarForm) return;
+    const alEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        if (editando) cerrarEdicion();
+        else if (mostrarForm) setMostrarForm(false);
+      }
+    };
+    window.addEventListener("keydown", alEscape);
+    return () => window.removeEventListener("keydown", alEscape);
+  }, [editando, mostrarForm]);
+
   const guardarEdicion = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editando) return;
@@ -253,8 +267,13 @@ export function VistaProductos(): JSX.Element {
 
       {/* Modal de Edición de Producto */}
       {editando && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-xl rounded-[16px] border border-linea bg-white p-6 shadow-2xl">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) cerrarEdicion();
+          }}
+        >
+          <div className="w-full max-w-xl rounded-[16px] border border-linea bg-white dark:bg-[#18181b] p-6 shadow-2xl">
             <div className="flex items-center justify-between border-b border-linea pb-3">
               <h3 className="text-[16px] font-semibold text-texto flex items-center gap-2">
                 <Pencil className="size-4 text-emerald-600" />

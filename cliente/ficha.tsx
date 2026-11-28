@@ -796,6 +796,18 @@ function BorrarDatos({ lead, cancelar, borrado }: { lead: Lead; cancelar: () => 
     borrado();
   };
 
+  useEffect(() => {
+    const alEscape = (evento: globalThis.KeyboardEvent) => {
+      if (evento.key === "Escape") {
+        evento.stopPropagation();
+        evento.preventDefault();
+        cancelar();
+      }
+    };
+    window.addEventListener("keydown", alEscape);
+    return () => window.removeEventListener("keydown", alEscape);
+  }, []);
+
   const alPulsar = (evento: KeyboardEvent<HTMLDivElement>) => {
     if (evento.key === "Escape") {
       evento.stopPropagation();

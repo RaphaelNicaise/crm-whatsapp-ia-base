@@ -195,6 +195,18 @@ export function SelectorCita({ lead, accion, cerrar, refrescar }: {
     void refrescar?.();
   };
 
+  useEffect(() => {
+    const alEscape = (evento: globalThis.KeyboardEvent) => {
+      if (evento.key === "Escape") {
+        evento.stopPropagation();
+        evento.preventDefault();
+        cerrar();
+      }
+    };
+    window.addEventListener("keydown", alEscape);
+    return () => window.removeEventListener("keydown", alEscape);
+  }, [cerrar]);
+
   const tituloTexto = accion === "dar" ? "Dar cita" : "Cambiar cita";
   const nota = "text-[13px] leading-[18px] text-secundario";
 

@@ -81,6 +81,18 @@ function Dialogo({ prellenado }: { prellenado: Prellenado }) {
     };
   }, [prellenado]);
 
+  useEffect(() => {
+    const alEscape = (e: globalThis.KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        e.preventDefault();
+        if (!enviando) cerrarAlta();
+      }
+    };
+    window.addEventListener("keydown", alEscape);
+    return () => window.removeEventListener("keydown", alEscape);
+  }, [enviando]);
+
   const cuerpo = estadoApp?.configuracion.plantilla.texto ?? CUERPOS_CONOCIDOS[cfg.plantilla.nombre] ?? CUERPO_GENERAL;
   const bienvenida = textoPlantilla(nombre.trim() || "tu cliente", cfg.negocio.nombre, cuerpo);
   const ejemploMovil = prefijo === "34" ? "+34 612 345 678" : `+${prefijo} …`;

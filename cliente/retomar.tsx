@@ -195,6 +195,18 @@ function SelectorRetomar({ lead, cerrar, refrescar }: { lead: Lead; cerrar: () =
     void refrescar();
   };
 
+  useEffect(() => {
+    const alEscape = (evento: globalThis.KeyboardEvent) => {
+      if (evento.key === "Escape") {
+        evento.stopPropagation();
+        evento.preventDefault();
+        cerrar();
+      }
+    };
+    window.addEventListener("keydown", alEscape);
+    return () => window.removeEventListener("keydown", alEscape);
+  }, [cerrar]);
+
   const fijasSugerida = variablesDePlantilla(SUGERIDA, lead, negocio).fijas;
   const textoSugerido = textoRenderizado(SUGERIDA, [fijasSugerida[1] ?? `[${etiquetaVariable(1)}]`, fijasSugerida[2] ?? `[${etiquetaVariable(2)}]`]);
 

@@ -541,6 +541,7 @@ export function Dialogo(p: {
     const alTeclear = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
+        e.stopPropagation();
         cerrar.current();
         return;
       }

@@ -150,6 +150,18 @@ function Formulario({ datos }: { datos: Abierto }) {
     confirmar(accion === "si" ? "Apuntado: ha dicho que sí" : "Apuntado: no sigue");
   };
 
+  useEffect(() => {
+    const alEscape = (evento: globalThis.KeyboardEvent) => {
+      if (evento.key === "Escape") {
+        evento.stopPropagation();
+        evento.preventDefault();
+        cerrarDialogo();
+      }
+    };
+    window.addEventListener("keydown", alEscape);
+    return () => window.removeEventListener("keydown", alEscape);
+  }, [cerrarDialogo]);
+
   // Escape cierra solo este diálogo (no la ficha de detrás) y el tabulador no sale de él.
   const alPulsar = (evento: KeyboardEvent<HTMLDivElement>) => {
     if (evento.key === "Escape") {

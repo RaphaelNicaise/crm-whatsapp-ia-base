@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, ExternalLink, Menu, Package, Receipt, Search, SlidersHorizontal, Sun, Users, Volume2, VolumeX, X } from "lucide-react";
+import { Bot, Building2, CalendarDays, ExternalLink, Globe, Menu, MessageSquare, Package, Plug, Receipt, Search, Settings2, SlidersHorizontal, Sun, UserPlus, Users, Volume2, VolumeX, X } from "lucide-react";
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent as EventoTeclado } from "react";
 import { citasDeHoy, teToca, type FilaTeToca } from "@/lib/inicio";
 import { esEjemplo } from "@/lib/negocio";
@@ -56,12 +56,7 @@ function MarcoPanel({ bd, conectado, refrescar }: { bd: Bd; conectado: boolean; 
   const { cfg, frases, zona } = useNegocio();
   const nombre = cfg.negocio.nombre;
   const ubicacion = useUbicacion();
-  const [vistaDirecta, setVistaDirecta] = useState<Vista | null>(null);
-  const vista = vistaDirecta ?? ubicacion.vista;
-
-  useEffect(() => {
-    setVistaDirecta(null);
-  }, [ubicacion.vista]);
+  const vista = ubicacion.vista;
   const [ahora, setAhora] = useState<Date | null>(null);
   const [paleta, setPaleta] = useState<{ inicial: string } | null>(null);
   const [aviso, setAviso] = useState<AvisoTeToca | null>(null);
@@ -293,7 +288,6 @@ function MarcoPanel({ bd, conectado, refrescar }: { bd: Bd; conectado: boolean; 
           key={id}
           type="button"
           onClick={() => {
-            setVistaDirecta(id);
             irA(id);
             if (enMenu) cerrarMenu();
           }}
@@ -375,7 +369,7 @@ function MarcoPanel({ bd, conectado, refrescar }: { bd: Bd; conectado: boolean; 
 
   return (
     <div className="min-h-screen bg-lienzo lg:grid lg:grid-cols-[240px_minmax(0,1fr)]">
-      <aside className="sticky top-0 hidden h-screen flex-col self-start bg-[#151515] px-3 pt-4 pb-3 text-white lg:flex">
+      <aside className="sticky top-0 hidden h-screen flex-col self-start bg-[#151515] px-3 pt-4 pb-3 text-white lg:flex overflow-y-auto z-20">
         <div className="flex items-start justify-between gap-2 px-1.5">
           <div className="flex items-start gap-2.5 min-w-0">
             {logo ? (
@@ -609,28 +603,128 @@ function MarcoPanel({ bd, conectado, refrescar }: { bd: Bd; conectado: boolean; 
         cerrar={() => setPaleta(null)}
         leads={leads}
         secciones={[
-          ...secciones.map(({ id, nombre: n }) => ({
-            id,
-            nombre: n,
-            palabras:
-              id === "configuracion"
-                ? "ajustes configuracion settings"
-                : id === "productos"
-                  ? "productos catalogo stock sku precios servicios"
-                  : id === "ventas"
-                    ? "ventas pedidos ingresos cobros facturacion"
-                    : id === "agenda"
-                      ? "agenda citas turnos calendario"
-                      : undefined,
-          })),
-          { id: "configuracion", nombre: "Ajustes · Negocio", bloque: "negocio", palabras: "nombre logo color pais moneda" },
-          { id: "configuracion", nombre: "Ajustes · Tu Asistente y Modelos IA", bloque: "asistente", palabras: "modelo openai gpt gemini claude tokens consumo prompt" },
-          { id: "configuracion", nombre: "Ajustes · Agenda y Horarios", bloque: "agenda", palabras: "horarios dias atencion franjas" },
-          { id: "configuracion", nombre: "Ajustes · WhatsApp y Conexiones", bloque: "whatsapp", palabras: "meta token webhook plantillas" },
-          { id: "configuracion", nombre: "Ajustes · Equipo y Usuarios", bloque: "equipo", palabras: "usuarios roles operadores admin equipo" },
-          { id: "configuracion", nombre: "Ajustes · Servidor MCP", bloque: "mcp", palabras: "mcp claude cursor protocolo" },
-          { id: "configuracion", nombre: "Ajustes · Web Pública", bloque: "web", palabras: "web portada formulario boton" },
-          { id: "configuracion", nombre: "Ajustes · Avanzado y Datos", bloque: "avanzado", palabras: "avanzado csv exportar instrucciones" },
+          {
+            id: "hoy",
+            nombre: "Hoy / Panel Principal",
+            descripcion: "Resumen de tareas, citas de hoy y clientes en espera",
+            palabras: "inicio hoy tareas avisos dia resumen",
+            icono: Sun,
+          },
+          {
+            id: "clientes",
+            nombre: frases.seccionClientes,
+            descripcion: "Embudo de prospectos, chat en directo y seguimiento",
+            palabras: "prospectos leads oportunidades mensajes conversacion clientes",
+            icono: Users,
+          },
+          {
+            id: "productos",
+            nombre: "Catálogo de Productos y Servicios",
+            descripcion: "Control de stock, precios, SKU y altas para ventas e IA",
+            palabras: "productos stock inventario precios catalogo articulos servicios sku",
+            icono: Package,
+          },
+          {
+            id: "ventas",
+            nombre: "Ventas y Presupuestos",
+            descripcion: "Presupuestos a leads, órdenes de venta y comprobantes",
+            palabras: "ventas pedidos presupuestos cotizaciones cobros ingresos facturas",
+            icono: Receipt,
+          },
+          {
+            id: "agenda",
+            nombre: "Agenda de Citas y Turnos",
+            descripcion: "Calendario de citas programadas y huecos libres",
+            palabras: "agenda citas calendario turnos reuniones reservas horarios",
+            icono: CalendarDays,
+          },
+          {
+            id: "configuracion",
+            nombre: "Ajustes Generales",
+            descripcion: "Configuración global de tu negocio y sistema CRM",
+            palabras: "ajustes configuracion settings opciones",
+            icono: SlidersHorizontal,
+          },
+          {
+            id: "configuracion",
+            nombre: "Ajustes · Tu Negocio",
+            bloque: "negocio",
+            descripcion: "Nombre del negocio, logo, moneda, país y colores de marca",
+            palabras: "marca logo color moneda pais nombre negocio perfil empresa",
+            icono: Building2,
+          },
+          {
+            id: "configuracion",
+            nombre: "Ajustes · Tu Asistente y Modelos IA",
+            bloque: "asistente",
+            descripcion: "OpenAI GPT-4o, Google Gemini, Anthropic Claude, tokens y prompt",
+            palabras: "asistente ia bot modelos openai gemini claude gpt tokens prompt llm inteligencia",
+            icono: Bot,
+          },
+          {
+            id: "configuracion",
+            nombre: "Ajustes · Agenda y Horarios",
+            bloque: "agenda",
+            descripcion: "Horarios comerciales, días de atención y franjas de citas",
+            palabras: "horarios dias atencion citas turnos franjas calendario agenda",
+            icono: CalendarDays,
+          },
+          {
+            id: "configuracion",
+            nombre: "Ajustes · WhatsApp y Conexiones",
+            bloque: "whatsapp",
+            descripcion: "Meta Cloud API, número de teléfono, webhook y plantillas",
+            palabras: "whatsapp meta token conexiones webhook api cloud mensajes",
+            icono: MessageSquare,
+          },
+          {
+            id: "configuracion",
+            nombre: "Ajustes · Equipo y Usuarios",
+            bloque: "equipo",
+            descripcion: "Usuarios, roles de operadores y accesos del equipo",
+            palabras: "equipo usuarios operadores roles admin acceso personal colaboradores",
+            icono: Users,
+          },
+          {
+            id: "configuracion",
+            nombre: "Ajustes · Servidor MCP",
+            bloque: "mcp",
+            descripcion: "Protocolo Model Context Protocol para Claude Desktop y Cursor",
+            palabras: "mcp servidor claude cursor protocolo herramientas tools integracion",
+            icono: Plug,
+          },
+          {
+            id: "configuracion",
+            nombre: "Ajustes · Web Pública",
+            bloque: "web",
+            descripcion: "Página web de reservas, formulario y botón WhatsApp",
+            palabras: "web publica portada formulario reservas landing",
+            icono: Globe,
+          },
+          {
+            id: "configuracion",
+            nombre: "Ajustes · Avanzado y Datos",
+            bloque: "avanzado",
+            descripcion: "Exportación, importación CSV, instrucciones y copias de seguridad",
+            palabras: "avanzado exportar importar csv datos backup instrucciones reset",
+            icono: Settings2,
+          },
+          {
+            id: "clientes",
+            nombre: "Añadir nuevo cliente / lead",
+            descripcion: "Dar de alta un cliente manualmente con su WhatsApp",
+            palabras: "nuevo cliente alta crear lead prospecto anadir registrar",
+            icono: UserPlus,
+            accion: () => abrirAltaCliente(),
+          },
+          {
+            id: "hoy",
+            nombre: "Ver tu web pública",
+            descripcion: "Abrir tu web de reservas en una nueva pestaña",
+            palabras: "ver web abrir enlace online",
+            icono: ExternalLink,
+            accion: () => window.open("/", "_blank"),
+          },
         ]}
       />
       <Confirmaciones />

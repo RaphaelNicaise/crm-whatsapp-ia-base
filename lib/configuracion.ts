@@ -107,13 +107,16 @@ export type ConfiguracionPublica = Omit<ConfiguracionResuelta, "portada" | "spam
 export interface ConfigAgente { negocio: string; calendario: ReglasAgenda; vocabulario: Vocabulario; campos: CampoLead[]; pistaDatos: { descripcion: string; campo: string }; agente: ReglasAgente; moneda: Moneda }
 export interface NegocioExportado { formato: "crm-whatsapp/negocio@1"; nombre: string; base: SectorPreset; configuracion: Omit<ConfiguracionPerfil, "sector" | "base">; instrucciones: string }
 export interface RevisionPrompt { error?: string; avisos: string[]; info: string[]; catalogo: { activo: boolean; refs: number; disponibles: number }; negociarAPersona: boolean }
-export type IdSeccionConfiguracion = "negocio" | "web" | "asistente" | "agenda" | "whatsapp";
+export type IdSeccionConfiguracion = "negocio" | "web" | "asistente" | "agenda" | "whatsapp" | "equipo" | "mcp" | "avanzado";
 export const SECCIONES_CONFIGURACION: { id: IdSeccionConfiguracion; nombre: string; ancla: string }[] = [
   { id: "negocio", nombre: "Tu negocio", ancla: "negocio" },
   { id: "web", nombre: "Tu web", ancla: "web" },
   { id: "asistente", nombre: "Tu asistente", ancla: "asistente" },
   { id: "agenda", nombre: "Horario de citas", ancla: "horario" },
   { id: "whatsapp", nombre: "Conexiones", ancla: "conexiones" },
+  { id: "equipo", nombre: "Equipo y Usuarios", ancla: "equipo" },
+  { id: "mcp", nombre: "Servidor MCP", ancla: "mcp" },
+  { id: "avanzado", nombre: "Avanzado y Datos", ancla: "avanzado" },
 ];
 export const COLORES_MARCA: { color: string | null; nombre: string }[] = [
   { color: null, nombre: "Clásico" }, { color: "#2b7bb9", nombre: "Azul" }, { color: "#c2562d", nombre: "Teja" },

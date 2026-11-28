@@ -317,6 +317,18 @@ export function PuestaEnMarcha(): JSX.Element | null {
 
   const salir = () => (auto ? aplazar() : cerrar());
 
+  useEffect(() => {
+    const alEscape = (evento: globalThis.KeyboardEvent) => {
+      if (evento.key === "Escape") {
+        evento.preventDefault();
+        evento.stopPropagation();
+        salir();
+      }
+    };
+    window.addEventListener("keydown", alEscape);
+    return () => window.removeEventListener("keydown", alEscape);
+  }, [salir]);
+
   const alPulsar = (evento: EventoTeclado<HTMLDivElement>) => {
     if (evento.key === "Escape") {
       evento.preventDefault();
@@ -349,16 +361,15 @@ export function PuestaEnMarcha(): JSX.Element | null {
       onKeyDown={alPulsar}
       className="fixed inset-0 z-[58] overflow-y-auto overscroll-contain bg-lienzo"
     >
-      {!auto && (
-        <button
-          type="button"
-          onClick={cerrar}
-          aria-label="Cerrar"
-          className="fixed top-5 right-5 z-10 flex size-10 cursor-pointer max-lg:top-3 max-lg:right-3 max-lg:size-11 items-center justify-center rounded-full text-secundario transition-colors duration-200 ease-out hover:bg-white hover:text-tinta focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tinta"
-        >
-          <X aria-hidden className="size-5" strokeWidth={1.75} />
-        </button>
-      )}
+      {/* Siempre hay salida: si se abrió sola, cerrar cuenta como «Lo dejo para luego» y no vuelve a salir. */}
+      <button
+        type="button"
+        onClick={salir}
+        aria-label={auto ? "Lo dejo para luego y vuelvo al panel" : "Cerrar"}
+        className="fixed top-5 right-5 z-10 flex size-10 cursor-pointer max-lg:top-3 max-lg:right-3 max-lg:size-11 items-center justify-center rounded-full text-secundario transition-colors duration-200 ease-out hover:bg-white hover:text-tinta focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tinta"
+      >
+        <X aria-hidden className="size-5" strokeWidth={1.75} />
+      </button>
       {/* Todas las pantallas empiezan a la misma altura: de la bienvenida al paso 1 nada salta ni se funde. */}
       <div key={pantalla} className={`mx-auto flex min-h-full w-full flex-col px-6 py-14 max-sm:px-4 max-sm:py-12 ${ancho}`}>
         {pantalla === "bienvenida" && (
